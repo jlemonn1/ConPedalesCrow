@@ -1,0 +1,295 @@
+.mapa-page {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.mapa-hero {
+  background: var(--color-bg-alt);
+  padding: var(--spacing-xxl) 0;
+  text-align: center;
+}
+
+.mapa-hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-md);
+}
+
+.mapa-hero p {
+  color: var(--color-text-light);
+  font-size: 1.125rem;
+}
+
+.mapa-content {
+  padding: var(--spacing-xl);
+}
+
+.mapa-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.mapa-visual {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.google-map-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  min-height: 600px;
+}
+
+.map-route-list {
+  background: #f8f9fa;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.country-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.country-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: white;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  border-left: 4px solid;
+}
+
+.country-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.country-km {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+}
+
+.country-points {
+  padding-left: var(--spacing-sm);
+}
+
+.point-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.point-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.point-item.active {
+  background: var(--color-accent);
+}
+
+.point-item.active .point-name,
+.point-item.active .point-km {
+  color: white;
+}
+
+.point-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.point-item.completed .point-marker {
+  background: var(--color-accent);
+}
+
+.point-item.active .point-marker {
+  background: var(--color-success);
+}
+
+.point-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.point-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.point-km {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
+.map-display {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+}
+
+.map-display .leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.point-detail-popup {
+  position: absolute;
+  bottom: var(--spacing-lg);
+  left: var(--spacing-lg);
+  background: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+.point-detail-popup h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xs);
+}
+
+.country-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.km-label {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  margin: var(--spacing-xs) 0 0;
+}
+
+.coords {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  margin: var(--spacing-xs) 0 0;
+}
+
+.route-summary {
+  display: flex;
+  justify-content: space-around;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-alt);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.summary-item .label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-item .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.mapa-info {
+  max-width: var(--container-max);
+  margin: var(--spacing-xxl) auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.mapa-info-card {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.mapa-info-card h3 {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.mapa-info-card p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+@media (max-width: 1200px) {
+  .google-map-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .map-route-list {
+    max-height: 300px;
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-md);
+  }
+  
+  .country-section {
+    min-width: 250px;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mapa-info {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mapa-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .route-summary {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+  }
+  
+  .summary-item {
+    flex: 1 1 40%;
+  }
+  
+  .mapa-info {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .point-detail-popup {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    bottom: var(--spacing-sm);
+  }
+}
