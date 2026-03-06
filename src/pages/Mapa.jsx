@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap, useMapEvents } from 'react-leaflet';
 import { api } from '../data/mockData';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
@@ -11,14 +11,14 @@ import L from 'leaflet';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
 const startIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -27,7 +27,7 @@ const startIcon = new L.Icon({
 
 const endIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -36,12 +36,36 @@ const endIcon = new L.Icon({
 
 const defaultIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
 });
+
+const completedIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+const EUROPE_BOUNDS = [[25, -25], [72, 45]];
+
+function MapEvents({ onMoveEnd }) {
+  const map = useMapEvents({
+    moveend: () => {
+      const center = map.getCenter();
+      if (center.lat < EUROPE_BOUNDS[0][0]) map.setLatLng([EUROPE_BOUNDS[0][0] + 1, center.lng]);
+      if (center.lat > EUROPE_BOUNDS[1][0]) map.setLatLng([EUROPE_BOUNDS[1][0] - 1, center.lng]);
+      if (center.lng < EUROPE_BOUNDS[0][1]) map.setLatLng([center.lat, EUROPE_BOUNDS[0][1] + 1]);
+      if (center.lng > EUROPE_BOUNDS[1][1]) map.setLatLng([center.lat, EUROPE_BOUNDS[1][1] - 1]);
+    }
+  });
+  return null;
+}
 
 function FitBounds({ points }) {
   const map = useMap();
@@ -51,10 +75,22 @@ function FitBounds({ points }) {
       const validPoints = points.filter(p => p && typeof p[0] === 'number' && typeof p[1] === 'number');
       if (validPoints.length > 0) {
         const bounds = L.latLngBounds(validPoints);
-        map.fitBounds(bounds, { padding: [50, 50] });
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
       }
     }
   }, [points, map]);
+  
+  return null;
+}
+
+function MapController({ center, zoom }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center && zoom) {
+      map.flyTo(center, zoom, { duration: 1 });
+    }
+  }, [center, zoom, map]);
   
   return null;
 }
@@ -64,7 +100,14 @@ export default function Mapa() {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const [showAllRoutes, setShowAllRoutes] = useState(false);
+  const [showRoute, setShowRoute] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [mapCenter, setMapCenter] = useState(null);
+  const [mapZoom, setMapZoom] = useState(null);
+  const [expandedCountry, setExpandedCountry] = useState(null);
+  const [filterCountry, setFilterCountry] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     Promise.all([
@@ -77,11 +120,20 @@ export default function Mapa() {
     });
   }, []);
 
+  useEffect(() => {
+    if (mapRef.current && route.length > 0 && !mapZoom) {
+      setTimeout(() => {
+        const bounds = L.latLngBounds(route.map(p => [p.lat, p.lng]));
+        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
+      }, 100);
+    }
+  }, [route, mapZoom]);
+
   if (loading) return <Loading />;
 
   const totalKm = route.length > 0 ? route[route.length - 1].km : 0;
-  
   const countries = [...new Set(route.map(p => p.country))];
+  const filteredRoute = filterCountry ? route.filter(p => p.country === filterCountry) : route;
   
   const stagesByCountry = countries.reduce((acc, country) => {
     const countryPoints = route.filter(p => p.country === country);
@@ -110,12 +162,40 @@ export default function Mapa() {
   };
 
   const getPointIcon = (point, index, total) => {
+    if (point.status === 'completed') return completedIcon;
     if (index === 0) return startIcon;
     if (index === total - 1) return endIcon;
     return defaultIcon;
   };
 
-  const routePositions = route.filter(p => p && typeof p.lat === 'number' && typeof p.lng === 'number').map(p => [p.lat, p.lng]);
+  const routePositions = filteredRoute
+    .filter(p => p && typeof p.lat === 'number' && typeof p.lng === 'number')
+    .map(p => [p.lat, p.lng]);
+
+  const handlePointClick = (point) => {
+    setSelectedPoint(point);
+    setMapCenter([point.lat, point.lng]);
+    setMapZoom(10);
+  };
+
+  const centerOnRoute = () => {
+    setMapCenter(null);
+    setMapZoom(null);
+    if (mapRef.current && route.length > 0) {
+      const bounds = L.latLngBounds(route.map(p => [p.lat, p.lng]));
+      mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
+    }
+  };
+
+  const toggleCountry = (country) => {
+    setExpandedCountry(prev => prev === country ? null : country);
+  };
+
+  const togglePanel = () => {
+    setPanelOpen(prev => !prev);
+  };
+
+  const center = route.length > 0 ? [route[0].lat, route[0].lng] : [46, 10];
 
   return (
     <>
@@ -124,147 +204,198 @@ export default function Mapa() {
         <div className="mapa-hero">
           <div className="container">
             <h1>Mapa del viaje</h1>
-            <p>Nuestra ruta completa desde Toledo hasta Atenas</p>
+            <p>Desde Toledo hasta Atenas</p>
           </div>
         </div>
         
-        <div className="mapa-content">
-          <div className="mapa-container">
-            <div className="mapa-visual">
-              <div className="google-map-container">
-                <div className="map-route-list">
-                  <div className="route-list-header">
-                    <h3>Ruta completa</h3>
-                    <label className="toggle-route">
-                      <input 
-                        type="checkbox" 
-                        checked={showAllRoutes}
-                        onChange={(e) => setShowAllRoutes(e.target.checked)}
-                      />
-                      <span>Mostrar ruta</span>
-                    </label>
-                  </div>
+        <div className="mapa-layout">
+          <div className={`route-panel ${panelOpen ? 'open' : 'closed'}`}>
+            <div className="panel-header">
+              <button className="panel-toggle-btn" onClick={togglePanel}>
+                {panelOpen ? '◀' : '▶'}
+              </button>
+              <span className="panel-title">Ruta</span>
+              <label className="route-toggle">
+                <input 
+                  type="checkbox" 
+                  checked={showRoute}
+                  onChange={(e) => setShowRoute(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+            
+            {panelOpen && (
+              <div className="panel-body">
+                <div className="country-filter">
+                  <select 
+                    value={filterCountry || ''} 
+                    onChange={(e) => setFilterCountry(e.target.value || null)}
+                  >
+                    <option value="">Todos los países</option>
+                    {countries.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="countries-list">
                   {countries.map((country) => (
-                    <div key={country} className="country-section">
-                      <div className="country-header" style={{ borderLeftColor: getCountryColor(country) }}>
-                        <h3>{country}</h3>
+                    <div key={country} className="country-block">
+                      <div 
+                        className="country-title"
+                        style={{ borderLeftColor: getCountryColor(country) }}
+                        onClick={() => toggleCountry(country)}
+                      >
+                        <span className="expand-icon">
+                          {expandedCountry === country ? '▼' : '▶'}
+                        </span>
+                        <span className="country-name">{country}</span>
                         <span className="country-km">{stagesByCountry[country]} km</span>
                       </div>
-                      <div className="country-points">
-                        {route.filter(p => p.country === country).map((point, pIdx) => (
-                          <div 
-                            key={pIdx} 
-                            className={`point-item ${point.status} ${selectedPoint === point ? 'active' : ''}`}
-                            onClick={() => setSelectedPoint(selectedPoint === point ? null : point)}
-                          >
-                            <div className="point-marker" style={{ backgroundColor: getCountryColor(country) }}>
-                              {pIdx + 1}
+                      
+                      {expandedCountry === country && (
+                        <div className="country-cities">
+                          {route.filter(p => p.country === country).map((point, pIdx) => (
+                            <div 
+                              key={pIdx} 
+                              className={`city-item ${selectedPoint === point ? 'selected' : ''} ${point.status}`}
+                              onClick={() => handlePointClick(point)}
+                            >
+                              <div 
+                                className="city-marker" 
+                                style={{ backgroundColor: getCountryColor(country) }}
+                              >
+                                {pIdx + 1}
+                              </div>
+                              <div className="city-info">
+                                <span className="city-name">{point.name}</span>
+                                <span className="city-km">{point.km} km</span>
+                              </div>
+                              {point.status === 'completed' && (
+                                <span className="status-badge">✓</span>
+                              )}
                             </div>
-                            <div className="point-info">
-                              <span className="point-name">{point.name}</span>
-                              <span className="point-km">{point.km} km</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+
+          <div className="map-container">
+            <div className="map-wrapper">
+              <MapContainer 
+                ref={mapRef}
+                center={center}
+                zoom={5}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+                zoomControl={true}
+                minZoom={4}
+                maxBounds={EUROPE_BOUNDS}
+                maxBoundsViscosity={1.0}
+                whenReady={() => setMapReady(true)}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
+                  url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  maxZoom={19}
+                  bounds={EUROPE_BOUNDS}
+                />
                 
-                <div className="map-display">
-                  <MapContainer 
-                    center={[route[0]?.lat || 40, route[0]?.lng || -4]} 
-                    zoom={5} 
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={true}
+                <MapEvents />
+                {mapCenter && <MapController center={mapCenter} zoom={mapZoom} />}
+                <FitBounds points={routePositions} />
+                
+                {showRoute && routePositions.length > 1 && (
+                  <Polyline 
+                    positions={routePositions} 
+                    color="#e74c3c" 
+                    weight={4} 
+                    opacity={0.8}
+                    dashArray="10, 10"
+                  />
+                )}
+                
+                {filteredRoute.map((point, index) => (
+                  <Marker 
+                    key={index} 
+                    position={[point.lat, point.lng]}
+                    icon={getPointIcon(point, index, filteredRoute.length)}
+                    eventHandlers={{ click: () => setSelectedPoint(point) }}
                   >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <FitBounds points={routePositions} />
-                    
-                    {showAllRoutes && (
-                      <Polyline 
-                        positions={routePositions} 
-                        color="#e74c3c" 
-                        weight={4} 
-                        opacity={0.8}
-                      />
-                    )}
-                    
-                    {route.map((point, index) => (
-                      <Marker 
-                        key={index} 
-                        position={[point.lat, point.lng]}
-                        icon={getPointIcon(point, index, route.length)}
-                      >
-                        <Popup>
-                          <div className="leaflet-popup">
-                            <h4>{point.name}</h4>
-                            <p className="country-label" style={{ color: getCountryColor(point.country) }}>
-                              {point.country}
-                            </p>
-                            <p className="km-label">{point.km} km desde Toledo</p>
-                          </div>
-                        </Popup>
-                      </Marker>
-                    ))}
-                  </MapContainer>
-                  
-                  {selectedPoint && (
-                    <div className="point-detail-popup">
-                      <h4>{selectedPoint.name}</h4>
-                      <p className="country-label" style={{ color: getCountryColor(selectedPoint.country) }}>
-                        {selectedPoint.country}
-                      </p>
-                      <p className="km-label">{selectedPoint.km} km desde Toledo</p>
-                      <p className="coords">
-                        {selectedPoint.lat.toFixed(4)}°, {selectedPoint.lng.toFixed(4)}°
-                      </p>
-                    </div>
-                  )}
-                </div>
+                    <Popup>
+                      <div className="leaflet-popup">
+                        <h4>{point.name}</h4>
+                        <p style={{ color: getCountryColor(point.country), fontWeight: 600 }}>
+                          {point.country}
+                        </p>
+                        <p>{point.km} km desde Toledo</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+
+              <div className="map-controls">
+                <button className="map-btn" onClick={centerOnRoute} title="Ver toda la ruta">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                </button>
+                <button className="map-btn mobile-toggle" onClick={togglePanel} title="Ver ruta">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                  </svg>
+                </button>
               </div>
-              
-              <div className="route-summary">
-                <div className="summary-item">
-                  <span className="label">Total países</span>
-                  <span className="value">{countries.length}</span>
+
+              {selectedPoint && (
+                <div className="selected-point-card">
+                  <button className="close-card" onClick={() => setSelectedPoint(null)}>×</button>
+                  <div className="card-content" style={{ borderLeftColor: getCountryColor(selectedPoint.country) }}>
+                    <h4>{selectedPoint.name}</h4>
+                    <p style={{ color: getCountryColor(selectedPoint.country) }}>{selectedPoint.country}</p>
+                    <span>{selectedPoint.km} km</span>
+                  </div>
                 </div>
-                <div className="summary-item">
-                  <span className="label">Ciudades</span>
-                  <span className="value">{route.length}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="label">Km totales</span>
-                  <span className="value">{totalKm.toLocaleString()}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="label">Días estimados</span>
-                  <span className="value">~{Math.round(totalKm / 80)}</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
-          
-          <div className="mapa-info">
-            <div className="mapa-info-card">
-              <h3>Km Totales</h3>
-              <p>{metrics?.totalKm?.toLocaleString() || totalKm.toLocaleString()}</p>
-            </div>
-            <div className="mapa-info-card">
-              <h3>Km Recorridos</h3>
-              <p>{metrics?.kmRecorridos || 420}</p>
-            </div>
-            <div className="mapa-info-card">
-              <h3>Días en camino</h3>
-              <p>{metrics?.diasViaje || 6}</p>
-            </div>
-            <div className="mapa-info-card">
-              <h3>Países</h3>
-              <p>{countries.length}</p>
-            </div>
+        </div>
+
+        <div className="mapa-stats">
+          <div className="stat-item">
+            <span className="stat-icon">🌍</span>
+            <span className="stat-info">
+              <span className="stat-number">{countries.length}</span>
+              <span className="stat-text">Países</span>
+            </span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-icon">🏙️</span>
+            <span className="stat-info">
+              <span className="stat-number">{route.length}</span>
+              <span className="stat-text">Ciudades</span>
+            </span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-icon">🛣️</span>
+            <span className="stat-info">
+              <span className="stat-number">{totalKm.toLocaleString()}</span>
+              <span className="stat-text">Km</span>
+            </span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-icon">📅</span>
+            <span className="stat-info">
+              <span className="stat-number">~{Math.round(totalKm / 80)}</span>
+              <span className="stat-text">Días</span>
+            </span>
           </div>
         </div>
       </div>
