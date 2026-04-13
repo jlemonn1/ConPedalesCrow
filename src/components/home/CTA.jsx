@@ -1,7 +1,10 @@
+import { useKmProgress } from '../../hooks/useStats';
 import Button from '../common/Button';
 import './CTA.css';
 
 export default function CTA() {
+  const { kmFinanced, totalDonors } = useKmProgress();
+
   return (
     <section className="cta-section">
       <div className="container">
@@ -13,11 +16,11 @@ export default function CTA() {
           </div>
           <div className="cta-stats">
             <div className="cta-stat">
-              <div className="cta-stat-value">2.430</div>
+              <div className="cta-stat-value">{kmFinanced.toLocaleString('es-ES')}</div>
               <div className="cta-stat-label">km financiados</div>
             </div>
             <div className="cta-stat">
-              <div className="cta-stat-value">132</div>
+              <div className="cta-stat-value">{totalDonors}</div>
               <div className="cta-stat-label">donantes</div>
             </div>
           </div>

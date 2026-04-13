@@ -1,31 +1,23 @@
-import { useState, useEffect } from 'react';
-import { api } from '../data/mockData';
+import { useDonations } from '../hooks/useDonations';
+import { useStats } from '../hooks/useStats';
+import { adaptDonationsForCards } from '../services/adapters';
+import { DONATION_CONFIG } from '../config/constants';
+import DonationCard from '../components/common/DonationCard';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import DonationCard from '../components/common/DonationCard';
 import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
 import './Comunidad.css';
 
 export default function Comunidad() {
-  const [donations, setDonations] = useState([]);
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { donations, loading: donationsLoading } = useDonations();
+  const { stats, loading: statsLoading } = useStats();
 
-  useEffect(() => {
-    Promise.all([
-      api.getDonations(20),
-      api.getMetrics()
-    ]).then(([donationsData, metricsData]) => {
-      setDonations(donationsData);
-      setMetrics(metricsData);
-      setLoading(false);
-    });
-  }, []);
+  if (donationsLoading || statsLoading) return <Loading />;
 
-  if (loading) return <Loading />;
-
-  const totalDonated = donations.reduce((acc, d) => acc + d.amount, 0);
+  const adaptedDonations = adaptDonationsForCards(donations);
+  const totalDonated = stats?.totalFunded || 0;
+  const kmFinanced = Math.floor(totalDonated / DONATION_CONFIG.pricePerKm);
 
   return (
     <>
@@ -41,15 +33,15 @@ export default function Comunidad() {
         <div className="comunidad-content">
           <div className="comunidad-stats">
             <div className="comunidad-stat">
-              <div className="comunidad-stat-value">{metrics?.donaciones || 0}</div>
+              <div className="comunidad-stat-value">{stats?.totalDonors || 0}</div>
               <div className="comunidad-stat-label">Donantes</div>
             </div>
             <div className="comunidad-stat">
-              <div className="comunidad-stat-value">{totalDonated}€</div>
+              <div className="comunidad-stat-value">{totalDonated.toLocaleString('es-ES')}€</div>
               <div className="comunidad-stat-label">Total donado</div>
             </div>
             <div className="comunidad-stat">
-              <div className="comunidad-stat-value">{api.fundedKm || 2430}</div>
+              <div className="comunidad-stat-value">{kmFinanced.toLocaleString('es-ES')}</div>
               <div className="comunidad-stat-label">Km financiados</div>
             </div>
           </div>
@@ -57,8 +49,8 @@ export default function Comunidad() {
           <div className="comunidad-section">
             <h2>Todas las donaciones</h2>
             <div className="comunidad-feed">
-              {donations.map(donation => (
-                <DonationCard key={donation.id} donation={donation} />
+              {adaptedDonations.map((donation, index) => (
+                <DonationCard key={index} donation={donation} />
               ))}
             </div>
           </div>

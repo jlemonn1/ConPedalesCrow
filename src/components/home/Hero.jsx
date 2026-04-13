@@ -1,6 +1,13 @@
+import { useStats } from '../../hooks/useStats';
 import './Hero.css';
 
 export default function Hero() {
+  const { stats } = useStats();
+
+  const totalKm = stats?.totalKm ?? 3400;
+  const estimatedDays = 90;
+  const countries = 12;
+
   return (
     <section className="hero">
       <div className="hero-bg-pattern"></div>
@@ -19,20 +26,20 @@ export default function Hero() {
         </h1>
         
         <p className="hero-subtitle">
-          Miles de kilómetros. Cientos de pedaladas. Una aventura que queremos compartir contigo.
+          Miles dekilómetros. Cientos de pedaladas. Una aventura que queremos compartir contigo.
         </p>
         
         <div className="hero-stats">
           <div className="hero-stat">
-            <span className="hero-stat-value">3.400</span>
+            <span className="hero-stat-value">{totalKm.toLocaleString('es-ES')}</span>
             <span className="hero-stat-label">Kilómetros</span>
           </div>
           <div className="hero-stat">
-            <span className="hero-stat-value">90</span>
+            <span className="hero-stat-value">{estimatedDays}</span>
             <span className="hero-stat-label">Días</span>
           </div>
           <div className="hero-stat">
-            <span className="hero-stat-value">4</span>
+            <span className="hero-stat-value">{countries}</span>
             <span className="hero-stat-label">Países</span>
           </div>
         </div>

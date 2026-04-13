@@ -1,22 +1,15 @@
-import { useState, useEffect } from 'react';
-import { api } from '../../data/mockData';
+import { useDonationFeed } from '../../hooks/useDonations';
+import { adaptDonationsForCards } from '../../services/adapters';
 import DonationCard from '../common/DonationCard';
-import Button from '../common/Button';
 import Loading from '../common/Loading';
 import './DonationFeed.css';
 
 export default function DonationFeed() {
-  const [donations, setDonations] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.getDonations(6).then(data => {
-      setDonations(data);
-      setLoading(false);
-    });
-  }, []);
+  const { donations, loading } = useDonationFeed(6);
 
   if (loading) return <Loading />;
+
+  const adaptedDonations = adaptDonationsForCards(donations);
 
   return (
     <section className="donation-feed">
@@ -27,8 +20,8 @@ export default function DonationFeed() {
         </div>
         
         <div className="donation-grid">
-          {donations.map(donation => (
-            <DonationCard key={donation.id} donation={donation} />
+          {adaptedDonations.map((donation, index) => (
+            <DonationCard key={index} donation={donation} />
           ))}
         </div>
       </div>

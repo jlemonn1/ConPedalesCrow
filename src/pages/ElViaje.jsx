@@ -1,28 +1,9 @@
-import { useState, useEffect } from 'react';
-import { api } from '../data/mockData';
+import { TRIP_INFO, PREVIOUS_TRIPS } from '../config/constants';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import Loading from '../components/common/Loading';
 import './ElViaje.css';
 
 export default function ElViaje() {
-  const [tripInfo, setTripInfo] = useState(null);
-  const [previousTrips, setPreviousTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([
-      api.getTripInfo(),
-      api.getPreviousTrips()
-    ]).then(([info, trips]) => {
-      setTripInfo(info);
-      setPreviousTrips(trips);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <Loading />;
-
   return (
     <>
       <Navbar />
@@ -30,8 +11,8 @@ export default function ElViaje() {
         <div className="elviaje-hero">
           <div className="container">
             <h1>El Viaje</h1>
-            <p className="tagline">{tripInfo.title}</p>
-            <p>{tripInfo.subtitle}</p>
+            <p className="tagline">{TRIP_INFO.title}</p>
+            <p>{TRIP_INFO.subtitle}</p>
           </div>
         </div>
         
@@ -39,33 +20,20 @@ export default function ElViaje() {
           <div className="story-section">
             <h2>Nuestra historia</h2>
             <p>
-              Somos dos amigos que un día tomamos una decisión que cambiaría nuestras vidas: dejar todo 
-              temporalmente para vivir la aventura de nuestros sueños. En marzo de 2026, saldremos de 
-              Toledo con un objetivo claro: llegar a Grecia pedaleando.
-            </p>
-            <p>
-              ¿Por qué Grecia? El Egeo siempre ha sido un sueño. Imagine kilometers de carreteras 
-              serpenteantes, montañas que tocan el cielo, pueblos donde el tiempo parece detenido. 
-              Queríamos descubrir Europa de la forma más auténtica posible: solo con la fuerza de 
-              nuestras piernas y la ilusión de quienes saben que el camino es tan importante como el destino.
-            </p>
-            <p>
-              Este viaje no es solo un reto físico. Es una forma de demostrar que los sueños se pueden 
-              cumplir con constancia, esfuerzo y el apoyo de quienes crees en ti. Cada pedalada nos 
-              acerca a Grecia, pero también nos acerca a nosotros mismos.
+              {TRIP_INFO.description}
             </p>
             
             <div className="story-highlight">
               <div className="story-stat">
-                <div className="story-stat-value">3.400</div>
+                <div className="story-stat-value">{TRIP_INFO.totalKmGoal.toLocaleString('es-ES')}</div>
                 <div className="story-stat-label">kilómetros</div>
               </div>
               <div className="story-stat">
-                <div className="story-stat-value">90</div>
+                <div className="story-stat-value">{TRIP_INFO.estimatedDays}</div>
                 <div className="story-stat-label">días estimados</div>
               </div>
               <div className="story-stat">
-                <div className="story-stat-value">4</div>
+                <div className="story-stat-value">12</div>
                 <div className="story-stat-label">países</div>
               </div>
             </div>
@@ -74,10 +42,14 @@ export default function ElViaje() {
           <div className="previous-trips">
             <h2>Viajes anteriores</h2>
             <div className="previous-trips-grid">
-              {previousTrips.map(trip => (
+              {PREVIOUS_TRIPS.map(trip => (
                 <div key={trip.id} className="trip-card">
                   <div className="trip-image">
-                    {trip.image === 'camino' ? '⛪' : '🏔️'}
+                    {trip.image ? (
+                      <img src={trip.image} alt={trip.title} className="trip-img" />
+                    ) : (
+                      trip.icon === 'camino' ? '⛪' : '🏔️'
+                    )}
                   </div>
                   <div className="trip-content">
                     <div className="trip-header">

@@ -1,27 +1,27 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../data/mockData';
+import { publicApi } from '../services/api';
+import { DONATION_CONFIG } from '../config/constants';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Button from '../components/common/Button';
 import './Donar.css';
 
 const amounts = [5, 10, 20, 50, 100];
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5173';
 
 export default function Donar() {
-  const navigate = useNavigate();
-  const [step, setStep] = useState('form');
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState('');
   const [formData, setFormData] = useState({
     name: '',
-    comment: '',
-    contact: ''
+    email: '',
+    comment: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const finalAmount = selectedAmount || (customAmount ? parseInt(customAmount) : 0);
-  const kmFinanced = Math.floor(finalAmount / 0.80);
+  const kmFinanced = Math.floor(finalAmount / DONATION_CONFIG.pricePerKm);
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
@@ -46,41 +46,28 @@ export default function Donar() {
     if (!formData.name.trim()) return;
 
     setSubmitting(true);
-    
+    setError(null);
+
     try {
-      await api.createDonation({
-        name: formData.name,
+      const response = await publicApi.createCheckout({
         amount: finalAmount,
-        comment: formData.comment
+        name: formData.name,
+        email: formData.email || undefined,
+        comment: formData.comment || undefined,
+        successUrl: `${BASE_URL}/donar/exito`,
+        cancelUrl: `${BASE_URL}/donar/cancelar`
       });
-      setStep('thankyou');
-    } catch (error) {
-      console.error('Error:', error);
+
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl;
+      }
+    } catch (err) {
+      console.error('Error creating checkout:', err);
+      setError('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (step === 'thankyou') {
-    return (
-      <>
-        <Navbar />
-        <div className="donar-page">
-          <div className="thank-you">
-            <div className="thank-you-icon">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2>¡Gracias por tu donación!</h2>
-            <p>Tu apoyo nos acerca un poco más a Grecia. Cada pedalada cuenta.</p>
-            <Button href="/" variant="primary">Volver al inicio</Button>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
 
   return (
     <>
@@ -95,7 +82,7 @@ export default function Donar() {
         
         <div className="donar-content">
           <div className="donar-explanation">
-            <h3>¿Por qué donate?</h3>
+            <h3>¿Por qué donar?</h3>
             <p>
               Si quieres ayudarnos a llegar a Grecia puedes aportar cualquier cantidad.
               <span className="highlight"> Cada euro cuenta.</span>
@@ -103,6 +90,12 @@ export default function Donar() {
               Las donaciones superiores a 10€ recibirán un pequeño regalo del viaje.
             </p>
           </div>
+          
+          {error && (
+            <div className="donar-error">
+              {error}
+            </div>
+          )}
           
           <form className="donar-form" onSubmit={handleSubmit}>
             <div className="donar-section">
@@ -147,26 +140,21 @@ export default function Donar() {
                 onChange={handleInputChange}
                 required
               />
+              <input
+                type="email"
+                name="email"
+                className="donar-input"
+                placeholder="Tu email (opcional)"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
               <textarea
                 name="comment"
                 className="donar-textarea"
-                placeholder="Mensaje opcional (opublicaremos con tu donación)"
+                placeholder="Mensaje opcional (se publicará con tu donación)"
                 value={formData.comment}
                 onChange={handleInputChange}
               />
-              {finalAmount >= 10 && (
-                <div className="contact-section">
-                  <p>Si tu donación supera los 10€, déjanos un contacto para enviarte un regalo del viaje.</p>
-                  <input
-                    type="text"
-                    name="contact"
-                    className="donar-input"
-                    placeholder="Email o teléfono"
-                    value={formData.contact}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
             </div>
             
             <Button 
@@ -175,7 +163,7 @@ export default function Donar() {
               className="donar-submit"
               disabled={!finalAmount || !formData.name.trim() || submitting}
             >
-              {submitting ? 'Procesando...' : 'Continuar al pago'}
+              {submitting ? 'Redirigiendo al pago...' : 'Continuar al pago'}
             </Button>
           </form>
         </div>

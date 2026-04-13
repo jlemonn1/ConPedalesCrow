@@ -1,32 +1,29 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { api } from '../data/mockData';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useStages } from '../hooks/useStages';
+import { adaptStagesForCards } from '../services/adapters';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import Button from '../components/common/Button';
 import Loading from '../components/common/Loading';
+import { formatDate, estimateTime } from '../utils/formatters';
 import './Diario.css';
 
 export default function Diario() {
-  const [searchParams] = useSearchParams();
-  const stageId = searchParams.get('id');
-  const [stages, setStages] = useState([]);
-  const [selectedStage, setSelectedStage] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { stages, loading } = useStages();
+  const [expandedStage, setExpandedStage] = useState(null);
 
-  useEffect(() => {
-    api.getStages(20).then(data => {
-      setStages(data);
-      setLoading(false);
-      
-      if (stageId) {
-        const stage = data.find(s => s.id === parseInt(stageId));
-        if (stage) setSelectedStage(stage);
-      }
-    });
-  }, [stageId]);
+  const adaptedStages = adaptStagesForCards(stages);
 
   if (loading) return <Loading />;
+
+  const toggleStage = (stageId) => {
+    setExpandedStage(expandedStage === stageId ? null : stageId);
+  };
+
+  const handleStageClick = (stageId) => {
+    navigate(`/diario/${stageId}`);
+  };
 
   return (
     <>
@@ -40,21 +37,29 @@ export default function Diario() {
         </div>
         
         <div className="diario-content">
-          {stages.length === 0 ? (
+          {adaptedStages.length === 0 ? (
             <div className="timeline-empty">
               <p>Próximamente añadiremos las primeras etapas del viaje.</p>
             </div>
           ) : (
             <div className="timeline">
-              {stages.map(stage => (
+              {adaptedStages.map((stage) => (
                 <div key={stage.id} className="timeline-item">
-                  <div className={`timeline-dot ${stage.current ? 'current' : ''}`}></div>
+                  <div 
+                    className={`timeline-dot ${stage.current ? 'current' : ''}`}
+                    onClick={() => toggleStage(stage.id)}
+                  />
                   <div className="timeline-content">
                     <span className={`timeline-number ${stage.current ? 'current' : ''}`}>
                       ETAPA {stage.number}
                       {stage.current && ' • EN CURSO'}
                     </span>
-                    <h3 className="timeline-title">{stage.title}</h3>
+                    <h3 
+                      className="timeline-title"
+                      onClick={() => handleStageClick(stage.id)}
+                    >
+                      {stage.title}
+                    </h3>
                     <div className="timeline-stats">
                       <span className="timeline-stat">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,10 +77,28 @@ export default function Diario() {
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {Math.round(stage.distance / 20)}h
+                        {estimateTime(stage.distance)}
                       </span>
                     </div>
-                    <p className="timeline-text">{stage.summary}</p>
+                    
+                    {expandedStage === stage.id && stage.summary && (
+                      <div className="timeline-detail">
+                        <p>{stage.summary}</p>
+                      </div>
+                    )}
+                    
+                    <div className="timeline-actions">
+                      <button 
+                        className="timeline-view-btn"
+                        onClick={() => handleStageClick(stage.id)}
+                      >
+                        Ver detalle
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                    
                     <span className="timeline-date">{stage.date}</span>
                   </div>
                 </div>

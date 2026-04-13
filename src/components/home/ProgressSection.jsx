@@ -1,25 +1,17 @@
-import { useState, useEffect } from 'react';
-import { api } from '../../data/mockData';
+import { useKmProgress } from '../../hooks/useStats';
+import { TRIP_INFO, DONATION_CONFIG } from '../../config/constants';
 import Button from '../common/Button';
 import ProgressBar from '../common/ProgressBar';
 import Loading from '../common/Loading';
 import './ProgressSection.css';
 
 export default function ProgressSection() {
-  const [fundedKm, setFundedKm] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.getFundedKm().then(data => {
-      setFundedKm(data);
-      setLoading(false);
-    });
-  }, []);
+  const { kmFinanced, totalFunded, loading } = useKmProgress();
 
   if (loading) return <Loading />;
 
-  const totalKm = 3400;
-  const percentage = Math.round((fundedKm / totalKm) * 100);
+  const goalKm = TRIP_INFO.totalKmGoal;
+  const percentage = goalKm > 0 ? Math.min(100, Math.round((kmFinanced / goalKm) * 100)) : 0;
 
   return (
     <section className="progress-section">
@@ -31,14 +23,14 @@ export default function ProgressSection() {
           </div>
           
           <div className="progress-highlight">
-            {fundedKm.toLocaleString()} km
+            {kmFinanced.toLocaleString('es-ES')} km
           </div>
           
           <div className="progress-bar-section">
-            <ProgressBar current={fundedKm} total={totalKm} />
+            <ProgressBar current={kmFinanced} total={goalKm} />
             <div className="progress-info">
-              <span>Objetivo: {totalKm.toLocaleString()} km</span>
-              <span className="progress-rate">100 km ≈ 80€</span>
+              <span>Objetivo: {goalKm.toLocaleString('es-ES')} km</span>
+              <span className="progress-rate">100 km ≈ {(100 * DONATION_CONFIG.pricePerKm).toFixed(0)}€</span>
             </div>
           </div>
           

@@ -1,4 +1,4 @@
-import Button from './Button';
+import { estimateTime } from '../../utils/formatters';
 import './StageCard.css';
 
 export default function StageCard({ stage, onReadMore }) {
@@ -26,13 +26,6 @@ export default function StageCard({ stage, onReadMore }) {
         </div>
         <p className="stage-summary">{stage.summary}</p>
         <span className="stage-date">{stage.date}</span>
-        {onReadMore && (
-          <div style={{ marginTop: 'var(--spacing-md)' }}>
-            <Button variant="secondary" size="small" onClick={() => onReadMore(stage)}>
-              Leer etapa
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

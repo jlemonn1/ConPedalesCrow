@@ -1,27 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../../data/mockData';
+import { useLatestStages } from '../../hooks/useStages';
+import { adaptStagesForCards } from '../../services/adapters';
 import StageCard from '../common/StageCard';
 import Loading from '../common/Loading';
 import './LatestStages.css';
 
 export default function LatestStages() {
-  const [stages, setStages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    api.getStages(3).then(data => {
-      setStages(data);
-      setLoading(false);
-    });
-  }, []);
-
-  const handleReadMore = (stage) => {
-    navigate(`/diario?id=${stage.id}`);
-  };
+  const { stages, loading } = useLatestStages(3);
 
   if (loading) return <Loading />;
+
+  const adaptedStages = adaptStagesForCards(stages);
 
   return (
     <section className="latest-stages">
@@ -34,11 +22,10 @@ export default function LatestStages() {
         </div>
         
         <div className="latest-grid">
-          {stages.map(stage => (
+          {adaptedStages.map(stage => (
             <StageCard 
               key={stage.id} 
               stage={stage} 
-              onReadMore={handleReadMore}
             />
           ))}
         </div>

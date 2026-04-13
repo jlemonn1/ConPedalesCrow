@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { api } from '../../data/mockData';
+import { useStats } from '../../hooks/useStats';
+import { useStages } from '../../hooks/useStages';
+import { adaptStatsForMetrics } from '../../services/adapters';
 import Loading from '../common/Loading';
 import './MetricsSection.css';
 
@@ -37,25 +38,20 @@ const metricIcons = {
 };
 
 export default function MetricsSection() {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { stats, loading: statsLoading } = useStats();
+  const { stages, loading: stagesLoading } = useStages();
 
-  useEffect(() => {
-    api.getMetrics().then(data => {
-      setMetrics(data);
-      setLoading(false);
-    });
-  }, []);
+  if (statsLoading || stagesLoading) return <Loading />;
 
-  if (loading) return <Loading />;
+  const metrics = adaptStatsForMetrics(stats, stages);
 
   const metricsData = [
-    { key: 'totalKm', value: metrics.totalKm.toLocaleString(), label: 'KM totales', icon: metricIcons.distance },
-    { key: 'kmRecorridos', value: metrics.kmRecorridos.toLocaleString(), label: 'KM recorridos', icon: metricIcons.road },
-    { key: 'diasViaje', value: metrics.diasViaje, label: 'Días de viaje', icon: metricIcons.calendar },
-    { key: 'paises', value: metrics.paises, label: 'Países', icon: metricIcons.globe },
-    { key: 'desnivel', value: metrics.desnivel.toLocaleString(), label: 'Desnivel (m)', icon: metricIcons.mountain },
-    { key: 'donaciones', value: metrics.donaciones, label: 'Donaciones', icon: metricIcons.heart },
+    { key: 'totalKm', value: metrics.totalKm.toLocaleString('es-ES'), label: 'KM totales', icon: metricIcons.distance },
+    { key: 'totalElevation', value: metrics.totalElevation.toLocaleString('es-ES'), label: 'Desnivel (m)', icon: metricIcons.mountain },
+    { key: 'totalStages', value: metrics.totalStages, label: 'Etapas', icon: metricIcons.road },
+    { key: 'totalDonations', value: metrics.totalDonations, label: 'Donaciones', icon: metricIcons.heart },
+    { key: 'daysOnRoad', value: '??', label: 'Días de viaje', icon: metricIcons.calendar },
+    { key: 'countriesVisited', value: metrics.countriesVisited, label: 'Países', icon: metricIcons.globe },
   ];
 
   return (

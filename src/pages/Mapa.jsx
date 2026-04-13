@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap, useMapEvents } from 'react-leaflet';
-import { api } from '../data/mockData';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
+import { useStages } from '../hooks/useStages';
+import { COUNTRY_COLORS } from '../config/constants';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Loading from '../components/common/Loading';
@@ -35,16 +36,7 @@ const endIcon = new L.Icon({
 });
 
 const defaultIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-const completedIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -53,19 +45,6 @@ const completedIcon = new L.Icon({
 });
 
 const EUROPE_BOUNDS = [[25, -25], [72, 45]];
-
-function MapEvents({ onMoveEnd }) {
-  const map = useMapEvents({
-    moveend: () => {
-      const center = map.getCenter();
-      if (center.lat < EUROPE_BOUNDS[0][0]) map.setLatLng([EUROPE_BOUNDS[0][0] + 1, center.lng]);
-      if (center.lat > EUROPE_BOUNDS[1][0]) map.setLatLng([EUROPE_BOUNDS[1][0] - 1, center.lng]);
-      if (center.lng < EUROPE_BOUNDS[0][1]) map.setLatLng([center.lat, EUROPE_BOUNDS[0][1] + 1]);
-      if (center.lng > EUROPE_BOUNDS[1][1]) map.setLatLng([center.lat, EUROPE_BOUNDS[1][1] - 1]);
-    }
-  });
-  return null;
-}
 
 function FitBounds({ points }) {
   const map = useMap();
@@ -96,106 +75,116 @@ function MapController({ center, zoom }) {
 }
 
 export default function Mapa() {
-  const [route, setRoute] = useState([]);
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedPoint, setSelectedPoint] = useState(null);
+  const { stages, loading } = useStages();
+  const [selectedStage, setSelectedStage] = useState(null);
   const [showRoute, setShowRoute] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
   const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(null);
   const [expandedCountry, setExpandedCountry] = useState(null);
   const [filterCountry, setFilterCountry] = useState(null);
-  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef(null);
 
-  useEffect(() => {
-    Promise.all([
-      api.getMapRoute(),
-      api.getMetrics()
-    ]).then(([routeData, metricsData]) => {
-      setRoute(routeData);
-      setMetrics(metricsData);
-      setLoading(false);
-    });
-  }, []);
+  const publishedStages = useMemo(() => {
+    if (!stages || stages.length === 0) return [];
+    return stages.filter(s => s.isPublished).sort((a, b) => a.dayNumber - b.dayNumber);
+  }, [stages]);
 
-  useEffect(() => {
-    if (mapRef.current && route.length > 0 && !mapZoom) {
-      setTimeout(() => {
-        const bounds = L.latLngBounds(route.map(p => [p.lat, p.lng]));
-        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
-      }, 100);
-    }
-  }, [route, mapZoom]);
+  const mapPoints = useMemo(() => {
+    if (publishedStages.length === 0) return [];
+    
+    const points = [];
+    let accumulatedKm = 0;
+    
+    publishedStages.forEach((stage, index) => {
+      accumulatedKm += stage.km;
+      const isFirst = index === 0;
+      const isLast = index === publishedStages.length -1;
+      
+      points.push({
+        lat: stage.startLat,
+        lng: stage.startLng,
+        name: stage.startName,
+        country: stage.country,
+        km: isFirst ? 0: accumulatedKm - stage.km,
+        type: 'start',
+        dayNumber: stage.dayNumber,
+        isHighlight: isFirst
+      });
+      
+      if (isLast) {
+        points.push({
+          lat: stage.endLat,
+          lng: stage.endLng,
+          name: stage.endName,
+          country: stage.country,
+          km: accumulatedKm,
+          type: 'end',
+          dayNumber: stage.dayNumber,
+          isHighlight: true
+        });
+      }
+    });
+    
+    return points;
+  }, [publishedStages]);
+
+  const countries = useMemo(() => {
+    return [...new Set(publishedStages.map(s => s.country))];
+  }, [publishedStages]);
+
+  const totalKm = useMemo(() => {
+    return publishedStages.reduce((acc, s) => acc + s.km, 0);
+  }, [publishedStages]);
+
+  const stagesByCountry = useMemo(() => {
+    const grouped = {};
+    publishedStages.forEach(stage => {
+      if (!grouped[stage.country]) {
+        grouped[stage.country] = { stages: [], totalKm: 0 };
+      }
+      grouped[stage.country].stages.push(stage);
+      grouped[stage.country].totalKm += stage.km;
+    });
+    return grouped;
+  }, [publishedStages]);
 
   if (loading) return <Loading />;
 
-  const totalKm = route.length > 0 ? route[route.length - 1].km : 0;
-  const countries = [...new Set(route.map(p => p.country))];
-  const filteredRoute = filterCountry ? route.filter(p => p.country === filterCountry) : route;
-  
-  const stagesByCountry = countries.reduce((acc, country) => {
-    const countryPoints = route.filter(p => p.country === country);
-    const countryKm = countryPoints.length > 0 ? 
-      countryPoints[countryPoints.length - 1].km - (countryPoints[0]?.km || 0) : 0;
-    acc[country] = countryKm;
-    return acc;
-  }, {});
-
   const getCountryColor = (country) => {
-    const colors = {
-      'España': '#c9a227',
-      'Francia': '#0055A4',
-      'Mónaco': '#cecece',
-      'Italia': '#009246',
-      'Eslovenia': '#00A551',
-      'Croacia': '#FF0000',
-      'Bosnia': '#002395',
-      'Montenegro': '#C6363C',
-      'Albania': '#E41B17',
-      'Serbia': '#0C4076',
-      'Macedonia': '#D70000',
-      'Grecia': '#001489'
-    };
-    return colors[country] || '#666';
+    return COUNTRY_COLORS[country] || '#666';
   };
 
-  const getPointIcon = (point, index, total) => {
-    if (point.status === 'completed') return completedIcon;
+  const getIcon = (point, index) => {
     if (index === 0) return startIcon;
-    if (index === total - 1) return endIcon;
+    if (index === mapPoints.length - 1) return endIcon;
     return defaultIcon;
   };
 
-  const routePositions = filteredRoute
+  const routePositions = mapPoints
     .filter(p => p && typeof p.lat === 'number' && typeof p.lng === 'number')
     .map(p => [p.lat, p.lng]);
 
-  const handlePointClick = (point) => {
-    setSelectedPoint(point);
-    setMapCenter([point.lat, point.lng]);
+  const handleStageClick = (stage) => {
+    setSelectedStage(stage);
+    setMapCenter([stage.startLat, stage.startLng]);
     setMapZoom(10);
   };
 
   const centerOnRoute = () => {
     setMapCenter(null);
     setMapZoom(null);
-    if (mapRef.current && route.length > 0) {
-      const bounds = L.latLngBounds(route.map(p => [p.lat, p.lng]));
+    if (mapRef.current && mapPoints.length > 0) {
+      const bounds = L.latLngBounds(mapPoints.map(p => [p.lat, p.lng]));
       mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
     }
-  };
-
-  const toggleCountry = (country) => {
-    setExpandedCountry(prev => prev === country ? null : country);
   };
 
   const togglePanel = () => {
     setPanelOpen(prev => !prev);
   };
 
-  const center = route.length > 0 ? [route[0].lat, route[0].lng] : [46, 10];
+  const center = mapPoints.length > 0 ? [mapPoints[0].lat, mapPoints[0].lng] : [46, 10];
 
   return (
     <>
@@ -245,36 +234,35 @@ export default function Mapa() {
                       <div 
                         className="country-title"
                         style={{ borderLeftColor: getCountryColor(country) }}
-                        onClick={() => toggleCountry(country)}
+                        onClick={() => setExpandedCountry(prev => prev === country ? null : country)}
                       >
                         <span className="expand-icon">
                           {expandedCountry === country ? '▼' : '▶'}
                         </span>
                         <span className="country-name">{country}</span>
-                        <span className="country-km">{stagesByCountry[country]} km</span>
+                        <span className="country-km">
+                          {stagesByCountry[country]?.totalKm.toFixed(0)} km
+                        </span>
                       </div>
                       
-                      {expandedCountry === country && (
+                      {expandedCountry === country && stagesByCountry[country] && (
                         <div className="country-cities">
-                          {route.filter(p => p.country === country).map((point, pIdx) => (
+                          {stagesByCountry[country].stages.map((stage) => (
                             <div 
-                              key={pIdx} 
-                              className={`city-item ${selectedPoint === point ? 'selected' : ''} ${point.status}`}
-                              onClick={() => handlePointClick(point)}
+                              key={stage.id} 
+                              className={`city-item ${selectedStage?.id === stage.id ? 'selected' : ''}`}
+                              onClick={() => handleStageClick(stage)}
                             >
                               <div 
                                 className="city-marker" 
                                 style={{ backgroundColor: getCountryColor(country) }}
                               >
-                                {pIdx + 1}
+                                {stage.dayNumber}
                               </div>
                               <div className="city-info">
-                                <span className="city-name">{point.name}</span>
-                                <span className="city-km">{point.km} km</span>
+                                <span className="city-name">{stage.startName} → {stage.endName}</span>
+                                <span className="city-km">{stage.km.toFixed(0)} km</span>
                               </div>
-                              {point.status === 'completed' && (
-                                <span className="status-badge">✓</span>
-                              )}
                             </div>
                           ))}
                         </div>
@@ -298,7 +286,6 @@ export default function Mapa() {
                 minZoom={4}
                 maxBounds={EUROPE_BOUNDS}
                 maxBoundsViscosity={1.0}
-                whenReady={() => setMapReady(true)}
               >
                 <TileLayer
                   attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
@@ -307,7 +294,6 @@ export default function Mapa() {
                   bounds={EUROPE_BOUNDS}
                 />
                 
-                <MapEvents />
                 {mapCenter && <MapController center={mapCenter} zoom={mapZoom} />}
                 <FitBounds points={routePositions} />
                 
@@ -321,12 +307,12 @@ export default function Mapa() {
                   />
                 )}
                 
-                {filteredRoute.map((point, index) => (
+                {mapPoints.map((point, index) => (
                   <Marker 
                     key={index} 
                     position={[point.lat, point.lng]}
-                    icon={getPointIcon(point, index, filteredRoute.length)}
-                    eventHandlers={{ click: () => setSelectedPoint(point) }}
+                    icon={getIcon(point, index)}
+                    eventHandlers={{ click: () => setSelectedStage(publishedStages[index]) }}
                   >
                     <Popup>
                       <div className="leaflet-popup">
@@ -334,7 +320,8 @@ export default function Mapa() {
                         <p style={{ color: getCountryColor(point.country), fontWeight: 600 }}>
                           {point.country}
                         </p>
-                        <p>{point.km} km desde Toledo</p>
+                        <p>Etapa {point.dayNumber}</p>
+                        <p>{point.km.toFixed(0)} km desde inicio</p>
                       </div>
                     </Popup>
                   </Marker>
@@ -354,13 +341,15 @@ export default function Mapa() {
                 </button>
               </div>
 
-              {selectedPoint && (
+              {selectedStage && (
                 <div className="selected-point-card">
-                  <button className="close-card" onClick={() => setSelectedPoint(null)}>×</button>
-                  <div className="card-content" style={{ borderLeftColor: getCountryColor(selectedPoint.country) }}>
-                    <h4>{selectedPoint.name}</h4>
-                    <p style={{ color: getCountryColor(selectedPoint.country) }}>{selectedPoint.country}</p>
-                    <span>{selectedPoint.km} km</span>
+                  <button className="close-card" onClick={() => setSelectedStage(null)}>×</button>
+                  <div className="card-content" style={{ borderLeftColor: getCountryColor(selectedStage.country) }}>
+                    <h4>Etapa {selectedStage.dayNumber}</h4>
+                    <p style={{ color: getCountryColor(selectedStage.country) }}>
+                      {selectedStage.startName} → {selectedStage.endName}
+                    </p>
+                    <span>{selectedStage.km.toFixed(0)} km | {selectedStage.elevationGain.toFixed(0)} m desnivel</span>
                   </div>
                 </div>
               )}
@@ -379,14 +368,14 @@ export default function Mapa() {
           <div className="stat-item">
             <span className="stat-icon">🏙️</span>
             <span className="stat-info">
-              <span className="stat-number">{route.length}</span>
-              <span className="stat-text">Ciudades</span>
+              <span className="stat-number">{publishedStages.length}</span>
+              <span className="stat-text">Etapas</span>
             </span>
           </div>
           <div className="stat-item">
             <span className="stat-icon">🛣️</span>
             <span className="stat-info">
-              <span className="stat-number">{totalKm.toLocaleString()}</span>
+              <span className="stat-number">{totalKm.toLocaleString('es-ES', { maximumFractionDigits: 0 })}</span>
               <span className="stat-text">Km</span>
             </span>
           </div>

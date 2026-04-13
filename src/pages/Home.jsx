@@ -5,6 +5,7 @@ import MetricsSection from '../components/home/MetricsSection';
 import ProgressSection from '../components/home/ProgressSection';
 import MapPreview from '../components/home/MapPreview';
 import LatestStages from '../components/home/LatestStages';
+import PhotoGallery from '../components/home/PhotoGallery';
 import DonationFeed from '../components/home/DonationFeed';
 import CTA from '../components/home/CTA';
 
@@ -18,6 +19,7 @@ export default function Home() {
         <ProgressSection />
         <MapPreview />
         <LatestStages />
+        <PhotoGallery />
         <DonationFeed />
         <CTA />
       </main>
