@@ -214,7 +214,7 @@ export default function Donar() {
               <button
                 type="submit"
                 className="donar-submit"
-                disabled={!finalAmount || !formData.name.trim() || submitting}
+                disabled={submitting}
               >
                 {submitting ? (
                   <span className="submit-loading">
