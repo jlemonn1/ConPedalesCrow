@@ -70,13 +70,25 @@
 
 @media (max-width: 768px) {
   .stage-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-sm);
   }
-}
 
-@media (max-width: 480px) {
-  .stage-stats-grid {
-    grid-template-columns: 1fr;
+  .stage-stat {
+    padding: var(--spacing-sm);
+  }
+
+  .stage-stat svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
   }
 }
 
