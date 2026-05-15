@@ -382,7 +382,7 @@ export default function Mapa() {
           <div className="stat-item">
             <span className="stat-icon">📅</span>
             <span className="stat-info">
-              <span className="stat-number">~{Math.round(totalKm / 80)}</span>
+              <span className="stat-number">{stages.filter(s => s.isPublished).length}</span>
               <span className="stat-text">Días</span>
             </span>
           </div>

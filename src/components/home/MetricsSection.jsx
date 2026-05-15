@@ -50,7 +50,7 @@ export default function MetricsSection() {
     { key: 'totalElevation', value: metrics.totalElevation.toLocaleString('es-ES'), label: 'Desnivel (m)', icon: metricIcons.mountain },
     { key: 'totalStages', value: metrics.totalStages, label: 'Etapas', icon: metricIcons.road },
     { key: 'totalDonations', value: metrics.totalDonations, label: 'Donaciones', icon: metricIcons.heart },
-    { key: 'daysOnRoad', value: '??', label: 'Días de viaje', icon: metricIcons.calendar },
+    { key: 'daysOnRoad', value: metrics.daysOnRoad.toLocaleString('es-ES'), label: 'Días de viaje', icon: metricIcons.calendar },
     { key: 'countriesVisited', value: metrics.countriesVisited, label: 'Países', icon: metricIcons.globe },
   ];
 

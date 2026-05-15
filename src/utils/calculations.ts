@@ -14,21 +14,6 @@ export function countCountries(stages: Stage[]): number {
 }
 
 // ============================================
-// DÍAS - Calcular días desde fecha de inicio
-// ============================================
-export function calculateDaysSinceStart(): number {
-  const now = new Date();
-  const start = TRIP_INFO.startDate;
-  const diffTime = Math.abs(now.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(0, diffDays);
-}
-
-export function formatDays(days: number): string {
-  return days.toLocaleString('es-ES');
-}
-
-// ============================================
 // KM - Calcular kilómetros restantes
 // ============================================
 export function calculateRemainingKm(totalKm: number, goalKm: number): number {

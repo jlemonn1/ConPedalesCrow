@@ -1,6 +1,6 @@
 import type { Stage, Stats, DonationFeedItem, Photo, MapData } from '../types';
 import { DONATION_CONFIG, TRIP_INFO } from '../config/constants';
-import { countCountries, calculateDaysSinceStart } from '../utils/calculations';
+import { countCountries } from '../utils/calculations';
 import { formatDate } from '../utils/formatters';
 
 // ============================================
@@ -63,7 +63,7 @@ export function adaptStatsForMetrics(stats: Stats | null, stages: Stage[]): Metr
     totalElevation: stats?.totalElevation ?? 0,
     totalStages: stats?.totalStages ?? 0,
     totalDonations: stats?.totalDonations ?? 0,
-    daysOnRoad: calculateDaysSinceStart(),
+    daysOnRoad: stats?.totalStages ?? 0,
     countriesVisited: countCountries(stages),
   };
 }

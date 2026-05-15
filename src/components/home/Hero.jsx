@@ -5,7 +5,7 @@ export default function Hero() {
   const { stats } = useStats();
 
   const totalKm = stats?.totalKm ?? 3400;
-  const estimatedDays = 90;
+  const estimatedDays = stats?.totalStages ?? 0;
   const countries = 12;
 
   return (
