@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './admin/context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import ScrollToTop from './components/common/ScrollToTop';
 import Home from './pages/Home';
 import Donar from './pages/Donar';
 import DonarExito from './pages/DonarExito';
@@ -117,6 +118,7 @@ function App() {
     <DataProvider>
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <AppRoutes />
         </Router>
       </AuthProvider>
