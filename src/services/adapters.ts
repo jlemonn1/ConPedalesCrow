@@ -52,16 +52,19 @@ export interface MetricsProps {
   totalKm: number;
   totalElevation: number;
   totalStages: number;
+  activeStages: number;
   totalDonations: number;
   daysOnRoad: number;
   countriesVisited: number;
 }
 
 export function adaptStatsForMetrics(stats: Stats | null, stages: Stage[]): MetricsProps {
+  const publishedStages = stages.filter(s => s.isPublished);
   return {
     totalKm: stats?.totalKm ?? 0,
     totalElevation: stats?.totalElevation ?? 0,
     totalStages: stats?.totalStages ?? 0,
+    activeStages: publishedStages.filter(s => s.km > 0).length,
     totalDonations: stats?.totalDonations ?? 0,
     daysOnRoad: stats?.totalStages ?? 0,
     countriesVisited: countCountries(stages),

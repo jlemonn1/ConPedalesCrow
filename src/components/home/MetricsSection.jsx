@@ -48,7 +48,7 @@ export default function MetricsSection() {
   const metricsData = [
     { key: 'totalKm', value: metrics.totalKm.toLocaleString('es-ES'), label: 'KM totales', icon: metricIcons.distance },
     { key: 'totalElevation', value: metrics.totalElevation.toLocaleString('es-ES'), label: 'Desnivel (m)', icon: metricIcons.mountain },
-    { key: 'totalStages', value: metrics.totalStages, label: 'Etapas', icon: metricIcons.road },
+    { key: 'activeStages', value: metrics.activeStages, label: 'Etapas', icon: metricIcons.road },
     { key: 'totalDonations', value: metrics.totalDonations, label: 'Donaciones', icon: metricIcons.heart },
     { key: 'daysOnRoad', value: metrics.daysOnRoad.toLocaleString('es-ES'), label: 'Días de viaje', icon: metricIcons.calendar },
     { key: 'countriesVisited', value: metrics.countriesVisited, label: 'Países', icon: metricIcons.globe },
