@@ -13,7 +13,6 @@ const amountOptions = [
   { value: 10, label: '10€', desc: 'Una pizza', icon: '🍕', popular: true },
   { value: 20, label: '20€', desc: 'Repostaje', icon: '⛽' },
   { value: 50, label: '50€', desc: 'Una noche', icon: '🏨' },
-  { value: 100, label: '100€', desc: 'Un día entero', icon: '🚲' },
 ];
 
 export default function Donar() {
@@ -22,28 +21,41 @@ export default function Donar() {
   const [formData, setFormData] = useState({ name: '', email: '', comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [touched, setTouched] = useState({ amount: false, name: false });
 
   const { totalDonors, loading: statsLoading } = useKmProgress();
 
   const finalAmount = selectedAmount || (customAmount ? parseInt(customAmount) : 0);
   const kmFinanced = Math.floor(finalAmount / DONATION_CONFIG.pricePerKm);
 
+  const amountError = touched.amount && finalAmount < 1;
+  const nameError = touched.name && !formData.name.trim();
+
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
     setCustomAmount('');
+    setTouched(prev => ({ ...prev, amount: true }));
   };
 
   const handleCustomAmountChange = (e) => {
     setCustomAmount(e.target.value);
     setSelectedAmount(null);
+    setTouched(prev => ({ ...prev, amount: true }));
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setTouched(prev => ({ ...prev, [e.target.name]: true }));
+  };
+
+  const handleBlur = (e) => {
+    setTouched(prev => ({ ...prev, [e.target.name]: true }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setTouched({ amount: true, name: true });
+
     if (!finalAmount || finalAmount < 1) return;
     if (!formData.name.trim()) return;
 
@@ -95,10 +107,12 @@ export default function Donar() {
 
             {error && <div className="donar-error">{error}</div>}
 
-            <form className="donar-form" onSubmit={handleSubmit}>
+            <form className="donar-form" onSubmit={handleSubmit} noValidate>
               <div className="donar-section">
-                <label className="donar-label">Selecciona un importe</label>
-                <div className="amount-buttons">
+                <label className="donar-label">
+                  Selecciona un importe <span className="required">*</span>
+                </label>
+                <div className={`amount-buttons ${amountError ? 'has-error' : ''}`}>
                   {amountOptions.map((opt) => (
                     <button
                       key={opt.value}
@@ -113,14 +127,21 @@ export default function Donar() {
                     </button>
                   ))}
                 </div>
+                {amountError && (
+                  <p className="field-error">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Por favor, selecciona o introduce un importe.
+                  </p>
+                )}
 
-                <div className="custom-amount">
+                <div className={`custom-amount ${amountError ? 'has-error' : ''}`}>
                   <span className="custom-prefix">€</span>
                   <input
                     type="number"
                     placeholder="Otra cantidad"
                     value={customAmount}
                     onChange={handleCustomAmountChange}
+                    onBlur={handleBlur}
                     min="1"
                   />
                 </div>
@@ -139,8 +160,10 @@ export default function Donar() {
               </div>
 
               <div className="donar-section">
-                <label className="donar-label">Tus datos</label>
-                <div className="donar-input-group">
+                <label className="donar-label">
+                  Tus datos <span className="required">*</span>
+                </label>
+                <div className={`donar-input-group ${nameError ? 'has-error' : ''}`}>
                   <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -148,12 +171,19 @@ export default function Donar() {
                     type="text"
                     name="name"
                     className="donar-input"
-                    placeholder="Tu nombre *"
+                    placeholder="Tu nombre"
                     value={formData.name}
                     onChange={handleInputChange}
-                    required
+                    onBlur={handleBlur}
                   />
                 </div>
+                {nameError && (
+                  <p className="field-error">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    El nombre es obligatorio para poder agradecerte la donación.
+                  </p>
+                )}
+
                 <div className="donar-input-group">
                   <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
