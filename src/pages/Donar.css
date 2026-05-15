@@ -1,61 +1,90 @@
 .donar-page {
-  padding-top: var(--navbar-height);
   min-height: 100vh;
   background: var(--color-bg);
 }
 
+/* ===== HERO ===== */
 .donar-hero {
+  position: relative;
   background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
-  padding: var(--spacing-xxxl) 0;
+  padding: var(--spacing-xl) 0 var(--spacing-xxl);
   text-align: center;
   color: white;
+  overflow: hidden;
+}
+
+.donar-hero-pattern {
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+
+.donar-hero .container {
+  position: relative;
+  z-index: 1;
 }
 
 .donar-hero h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 800;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .donar-hero p {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   opacity: 0.9;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
+/* ===== CONTENT ===== */
 .donar-content {
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: var(--spacing-xxxl) var(--spacing-lg);
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-xxxl);
 }
 
-.donar-explanation {
+/* ===== CARD ===== */
+.donar-card {
   background: var(--color-bg-alt);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: cardEnter 0.5s ease-out;
 }
 
-.donar-explanation h3 {
-  font-size: 1.25rem;
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.donar-card-header {
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+  background: linear-gradient(to bottom, rgba(255,107,53,0.04), transparent);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.donar-card-header h2 {
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text);
 }
 
-.donar-explanation p {
+.donar-card-subtitle {
   color: var(--color-text-light);
   line-height: 1.7;
+  font-size: 0.95rem;
 }
 
-.donar-explanation .highlight {
+.donar-card-subtitle .highlight {
   color: var(--color-accent);
   font-weight: 600;
 }
 
+/* ===== FORM ===== */
 .donar-form {
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
 }
 
@@ -63,17 +92,21 @@
   margin-bottom: var(--spacing-xl);
 }
 
-.donar-section:last-child {
-  margin-bottom: 0;
+.donar-section:last-of-type {
+  margin-bottom: var(--spacing-lg);
 }
 
-.donar-section h3 {
-  font-size: 1rem;
+.donar-label {
+  display: block;
+  font-size: 0.875rem;
   font-weight: 600;
-  margin-bottom: var(--spacing-md);
   color: var(--color-text-light);
+  margin-bottom: var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
+/* ===== AMOUNT BUTTONS ===== */
 .amount-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -82,118 +115,326 @@
 }
 
 .amount-btn {
-  padding: var(--spacing-md);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--spacing-md) var(--spacing-sm);
   background: var(--color-bg);
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 1.125rem;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .amount-btn:hover {
   border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .amount-btn.selected {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: white;
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
+.amount-btn.popular {
+  border-color: var(--color-accent);
+}
+
+.popular-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-accent);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.amount-btn.selected .popular-badge {
+  background: white;
+  color: var(--color-accent);
+}
+
+.amount-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.amount-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.amount-desc {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.amount-btn.selected .amount-desc {
+  opacity: 0.9;
+}
+
+/* ===== CUSTOM AMOUNT ===== */
 .custom-amount {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
-.custom-amount span {
-  font-size: 1.25rem;
+.custom-prefix {
+  position: absolute;
+  left: var(--spacing-md);
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--color-text-light);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .custom-amount input {
-  flex: 1;
-  padding: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 2.5rem;
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: 1.125rem;
   font-weight: 600;
-  transition: border-color var(--transition-fast);
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
 }
 
 .custom-amount input:focus {
   outline: none;
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
 }
 
-.km-indicator {
-  background: var(--color-accent-light);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  text-align: center;
-  margin-top: var(--spacing-md);
-}
-
-.km-indicator p {
-  font-size: 0.9375rem;
+.custom-amount input::placeholder {
   color: var(--color-text-light);
+  font-weight: 400;
 }
 
-.km-indicator strong {
-  color: var(--color-accent);
-}
-
-.donar-input {
-  width: 100%;
+/* ===== KM INDICATOR ===== */
+.km-indicator {
+  background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%);
+  border: 1px solid rgba(255, 107, 53, 0.15);
+  border-radius: var(--radius-lg);
   padding: var(--spacing-md);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  transition: border-color var(--transition-fast);
-  margin-bottom: var(--spacing-md);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s ease;
+  pointer-events: none;
 }
 
-.donar-input:focus {
-  outline: none;
-  border-color: var(--color-accent);
+.km-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
-.donar-textarea {
-  width: 100%;
-  padding: var(--spacing-md);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  resize: vertical;
-  min-height: 100px;
-  transition: border-color var(--transition-fast);
-  margin-bottom: var(--spacing-md);
-}
-
-.donar-textarea:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.contact-section {
-  background: var(--color-bg);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-}
-
-.contact-section p {
-  font-size: 0.875rem;
+.km-indicator-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-size: 0.9375rem;
   color: var(--color-text-light);
   margin-bottom: var(--spacing-sm);
 }
 
-.donar-submit {
-  width: 100%;
-  margin-top: var(--spacing-xl);
+.km-icon {
+  font-size: 1.25rem;
 }
 
+.km-indicator strong {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.km-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.km-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+  border-radius: 50px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===== INPUT GROUPS ===== */
+.donar-input-group {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-light);
+  pointer-events: none;
+}
+
+.textarea-group .input-icon {
+  top: var(--spacing-md);
+  transform: none;
+}
+
+.donar-input,
+.donar-textarea {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 2.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.donar-input:focus,
+.donar-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.donar-textarea {
+  resize: vertical;
+  min-height: 100px;
+  padding-top: var(--spacing-md);
+}
+
+.donar-input::placeholder,
+.donar-textarea::placeholder {
+  color: var(--color-text-light);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.donar-submit {
+  width: 100%;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);
+}
+
+.donar-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+}
+
+.donar-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.donar-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: var(--color-text-light);
+}
+
+.submit-text strong {
+  font-weight: 800;
+}
+
+.submit-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== TRUST BAR ===== */
+.donar-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.trust-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+.trust-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ===== ERROR ===== */
+.donar-error {
+  background: #fde8e8;
+  color: #c81e1e;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin: 0 var(--spacing-xl) var(--spacing-md);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+/* ===== THANK YOU (legacy) ===== */
 .thank-you {
   text-align: center;
   padding: var(--spacing-xxxl) var(--spacing-lg);
@@ -228,12 +469,70 @@
   margin-bottom: var(--spacing-xl);
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .donar-hero h1 {
-    font-size: 2rem;
+  .donar-hero {
+    padding: var(--spacing-lg) 0 var(--spacing-xl);
   }
-  
+
+  .donar-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .donar-hero p {
+    font-size: 0.95rem;
+  }
+
+  .donar-content {
+    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xxl);
+  }
+
+  .donar-card-header {
+    padding: var(--spacing-lg);
+  }
+
+  .donar-form {
+    padding: var(--spacing-lg);
+  }
+
   .amount-buttons {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .donar-trust {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .trust-divider {
+    display: none;
+  }
+
+  .trust-item {
+    font-size: 0.75rem;
+  }
+
+  .donar-submit {
+    font-size: 1rem;
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .amount-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .amount-btn {
+    padding: var(--spacing-sm);
+  }
+
+  .amount-value {
+    font-size: 1rem;
+  }
+
+  .amount-desc {
+    font-size: 0.65rem;
   }
 }

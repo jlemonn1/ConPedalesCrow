@@ -1,24 +1,29 @@
 import { useState } from 'react';
 import { publicApi } from '../services/api';
 import { DONATION_CONFIG } from '../config/constants';
+import { useKmProgress } from '../hooks/useStats';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import Button from '../components/common/Button';
 import './Donar.css';
 
-const amounts = [5, 10, 20, 50, 100];
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5173';
+
+const amountOptions = [
+  { value: 5, label: '5€', desc: 'Un café', icon: '☕' },
+  { value: 10, label: '10€', desc: 'Una pizza', icon: '🍕', popular: true },
+  { value: 20, label: '20€', desc: 'Repostaje', icon: '⛽' },
+  { value: 50, label: '50€', desc: 'Una noche', icon: '🏨' },
+  { value: 100, label: '100€', desc: 'Un día entero', icon: '🚲' },
+];
 
 export default function Donar() {
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    comment: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  const { totalDonors, loading: statsLoading } = useKmProgress();
 
   const finalAmount = selectedAmount || (customAmount ? parseInt(customAmount) : 0);
   const kmFinanced = Math.floor(finalAmount / DONATION_CONFIG.pricePerKm);
@@ -34,10 +39,7 @@ export default function Donar() {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -55,7 +57,7 @@ export default function Donar() {
         email: formData.email || undefined,
         comment: formData.comment || undefined,
         successUrl: `${BASE_URL}/donar/exito`,
-        cancelUrl: `${BASE_URL}/donar/cancelar`
+        cancelUrl: `${BASE_URL}/donar/cancelar`,
       });
 
       if (response.checkoutUrl) {
@@ -74,98 +76,153 @@ export default function Donar() {
       <Navbar />
       <div className="donar-page">
         <div className="donar-hero">
+          <div className="donar-hero-pattern" />
           <div className="container">
             <h1>Donar</h1>
             <p>Ayúdanos a llegar al Egeo. Cada euro cuenta.</p>
           </div>
         </div>
-        
+
         <div className="donar-content">
-          <div className="donar-explanation">
-            <h3>¿Por qué donar?</h3>
-            <p>
-              Si quieres ayudarnos a llegar a Grecia puedes aportar cualquier cantidad.
-              <span className="highlight"> Cada euro cuenta.</span>
-              <br /><br />
-              Las donaciones superiores a 10€ recibirán un pequeño regalo del viaje.
-            </p>
-          </div>
-          
-          {error && (
-            <div className="donar-error">
-              {error}
+          <div className="donar-card">
+            <div className="donar-card-header">
+              <h2>Elige tu aportación</h2>
+              <p className="donar-card-subtitle">
+                Si quieres ayudarnos a llegar a Grecia puedes aportar cualquier cantidad.
+                <span className="highlight"> Cada euro cuenta.</span> Las donaciones superiores a 10€ recibirán un pequeño regalo del viaje.
+              </p>
             </div>
-          )}
-          
-          <form className="donar-form" onSubmit={handleSubmit}>
-            <div className="donar-section">
-              <h3>Selecciona un importe</h3>
-              <div className="amount-buttons">
-                {amounts.map(amount => (
-                  <button
-                    key={amount}
-                    type="button"
-                    className={`amount-btn ${selectedAmount === amount ? 'selected' : ''}`}
-                    onClick={() => handleAmountSelect(amount)}
-                  >
-                    {amount}€
-                  </button>
-                ))}
-              </div>
-              <div className="custom-amount">
-                <span>Otro:</span>
-                <input
-                  type="number"
-                  placeholder="Importe personalizado"
-                  value={customAmount}
-                  onChange={handleCustomAmountChange}
-                  min="1"
-                />
-              </div>
-              {finalAmount > 0 && (
-                <div className="km-indicator">
-                  <p>Esto financia aproximadamente: <strong>{kmFinanced} km</strong></p>
+
+            {error && <div className="donar-error">{error}</div>}
+
+            <form className="donar-form" onSubmit={handleSubmit}>
+              <div className="donar-section">
+                <label className="donar-label">Selecciona un importe</label>
+                <div className="amount-buttons">
+                  {amountOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`amount-btn ${selectedAmount === opt.value ? 'selected' : ''} ${opt.popular ? 'popular' : ''}`}
+                      onClick={() => handleAmountSelect(opt.value)}
+                    >
+                      {opt.popular && <span className="popular-badge">Más popular</span>}
+                      <span className="amount-icon">{opt.icon}</span>
+                      <span className="amount-value">{opt.label}</span>
+                      <span className="amount-desc">{opt.desc}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+
+                <div className="custom-amount">
+                  <span className="custom-prefix">€</span>
+                  <input
+                    type="number"
+                    placeholder="Otra cantidad"
+                    value={customAmount}
+                    onChange={handleCustomAmountChange}
+                    min="1"
+                  />
+                </div>
+
+                <div className={`km-indicator ${finalAmount > 0 ? 'visible' : ''}`}>
+                  <div className="km-indicator-inner">
+                    <span className="km-icon">🚲</span>
+                    <span>
+                      Financias aproximadamente <strong>{kmFinanced} km</strong> del trayecto
+                    </span>
+                  </div>
+                  <div className="km-bar">
+                    <div className="km-bar-fill" style={{ width: `${Math.min(100, kmFinanced * 2)}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="donar-section">
+                <label className="donar-label">Tus datos</label>
+                <div className="donar-input-group">
+                  <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <input
+                    type="text"
+                    name="name"
+                    className="donar-input"
+                    placeholder="Tu nombre *"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="donar-input-group">
+                  <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                  <input
+                    type="email"
+                    name="email"
+                    className="donar-input"
+                    placeholder="Tu email (opcional)"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="donar-input-group textarea-group">
+                  <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <textarea
+                    name="comment"
+                    className="donar-textarea"
+                    placeholder="Mensaje opcional (se publicará con tu donación)"
+                    value={formData.comment}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="donar-submit"
+                disabled={!finalAmount || !formData.name.trim() || submitting}
+              >
+                {submitting ? (
+                  <span className="submit-loading">
+                    <span className="spinner" /> Redirigiendo al pago...
+                  </span>
+                ) : finalAmount > 0 ? (
+                  <span className="submit-text">
+                    Donar <strong>{finalAmount}€</strong> — Financia {kmFinanced} km
+                  </span>
+                ) : (
+                  'Continuar al pago'
+                )}
+              </button>
+            </form>
+
+            <div className="donar-trust">
+              <div className="trust-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>Pago seguro con Stripe</span>
+              </div>
+              <div className="trust-divider" />
+              <div className="trust-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+                <span>Regalo incluido +10€</span>
+              </div>
+              <div className="trust-divider" />
+              <div className="trust-item">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{statsLoading ? '...' : totalDonors} personas ya donaron</span>
+              </div>
             </div>
-            
-            <div className="donar-section">
-              <h3>Tus datos</h3>
-              <input
-                type="text"
-                name="name"
-                className="donar-input"
-                placeholder="Tu nombre *"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                className="donar-input"
-                placeholder="Tu email (opcional)"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-              <textarea
-                name="comment"
-                className="donar-textarea"
-                placeholder="Mensaje opcional (se publicará con tu donación)"
-                value={formData.comment}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              size="large" 
-              className="donar-submit"
-              disabled={!finalAmount || !formData.name.trim() || submitting}
-            >
-              {submitting ? 'Redirigiendo al pago...' : 'Continuar al pago'}
-            </Button>
-          </form>
+          </div>
         </div>
       </div>
       <Footer />
