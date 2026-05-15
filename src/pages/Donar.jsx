@@ -21,7 +21,7 @@ export default function Donar() {
   const [formData, setFormData] = useState({ name: '', email: '', comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [touched, setTouched] = useState({ amount: false, name: false });
+  const [touched, setTouched] = useState({ amount: false, name: false, email: false });
 
   const { totalDonors, loading: statsLoading } = useKmProgress();
 
@@ -30,6 +30,8 @@ export default function Donar() {
 
   const amountError = touched.amount && finalAmount < 1;
   const nameError = touched.name && !formData.name.trim();
+  const emailRequired = finalAmount >= 10;
+  const emailError = touched.email && emailRequired && !formData.email.trim();
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
@@ -58,10 +60,11 @@ export default function Donar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setTouched({ amount: true, name: true });
+    setTouched({ amount: true, name: true, email: true });
 
     if (!finalAmount || finalAmount < 1) return;
     if (!formData.name.trim()) return;
+    if (emailRequired && !formData.email.trim()) return;
 
     setSubmitting(true);
     setError(null);
@@ -191,7 +194,7 @@ export default function Donar() {
                   </p>
                 )}
 
-                <div className="donar-input-group">
+                <div className={`donar-input-group ${emailError ? 'has-error' : ''}`}>
                   <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
@@ -199,11 +202,19 @@ export default function Donar() {
                     type="email"
                     name="email"
                     className="donar-input"
-                    placeholder="Tu email (opcional)"
+                    placeholder={`Tu email${emailRequired ? '' : ' (opcional)'}`}
                     value={formData.email}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    required={emailRequired}
                   />
                 </div>
+                {emailError && (
+                  <p className="field-error">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    El email es obligatorio para donaciones de 10€ o más (necesario para el regalo).
+                  </p>
+                )}
                 <div className="donar-input-group textarea-group">
                   <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
