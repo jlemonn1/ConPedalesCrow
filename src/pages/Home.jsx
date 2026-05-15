@@ -3,7 +3,6 @@ import Footer from '../components/layout/Footer';
 import Hero from '../components/home/Hero';
 import MetricsSection from '../components/home/MetricsSection';
 import ProgressSection from '../components/home/ProgressSection';
-import MapPreview from '../components/home/MapPreview';
 import LatestStages from '../components/home/LatestStages';
 import PhotoGallery from '../components/home/PhotoGallery';
 import DonationFeed from '../components/home/DonationFeed';
@@ -17,7 +16,6 @@ export default function Home() {
         <Hero />
         <MetricsSection />
         <ProgressSection />
-        <MapPreview />
         <LatestStages />
         <PhotoGallery />
         <DonationFeed />

@@ -1,9 +1,17 @@
+import { useNavigate } from 'react-router-dom';
 import { estimateTime } from '../../utils/formatters';
 import './StageCard.css';
 
 export default function StageCard({ stage, onReadMore }) {
+  const navigate = useNavigate();
+
   return (
-    <div className={`stage-card ${stage.current ? 'current' : ''}`}>
+    <div 
+      className={`stage-card ${stage.current ? 'current' : ''}`}
+      onClick={() => navigate(`/diario/${stage.id}`)}
+      role="button"
+      tabIndex={0}
+    >
       <div className="stage-image">
         <span className="stage-number">ETAPA {stage.number}</span>
         {stage.current && <span className="stage-current-badge">EN CURSO</span>}
