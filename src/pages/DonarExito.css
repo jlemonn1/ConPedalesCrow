@@ -1,73 +1,194 @@
 .donar-exito-page {
-  min-height: 70vh;
+  min-height: calc(100vh - var(--navbar-height));
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-xxl) var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-md);
+  background: linear-gradient(135deg, #f8fafc 0%, #fff5f0 100%);
 }
 
-.exito-container {
+.exito-card {
   text-align: center;
-  max-width: 600px;
+  max-width: 520px;
+  width: 100%;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xxxl) var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Icon */
+.exito-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
 }
 
 .exito-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+  position: relative;
+  z-index: 1;
+  animation: iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
 }
 
 .exito-icon svg {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   color: white;
 }
 
-.exito-container h1 {
-  font-size: 2rem;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
+.exito-icon-ring {
+  position: absolute;
+  inset: -8px;
+  border: 3px solid rgba(34, 197, 94, 0.2);
+  border-radius: 50%;
+  animation: ringPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+/* Text */
+.exito-card h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  animation: fadeUp 0.5s ease 0.3s both;
 }
 
 .exito-message {
-  color: var(--color-text-secondary);
-  font-size: 1.1rem;
-  line-height: 1.6;
+  color: var(--color-text-light);
+  font-size: 1rem;
+  line-height: 1.7;
   margin-bottom: var(--spacing-xl);
+  animation: fadeUp 0.5s ease 0.4s both;
 }
 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stats */
 .exito-stats {
-  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  background: var(--color-bg);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
+  animation: fadeUp 0.5s ease 0.5s both;
 }
 
 .exito-stat {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  align-items: center;
+  gap: 2px;
+}
+
+.exito-stat-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-bottom: var(--spacing-xs);
 }
 
 .exito-stat-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--color-primary-500);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1.1;
 }
 
 .exito-stat-label {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
+  color: var(--color-text-light);
+  font-size: 0.8rem;
 }
 
+.exito-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--color-border);
+}
+
+/* Actions */
 .exito-actions {
   display: flex;
   gap: var(--spacing-md);
   justify-content: center;
   flex-wrap: wrap;
+  animation: fadeUp 0.5s ease 0.6s both;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .donar-exito-page {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .exito-card {
+    padding: var(--spacing-xxl) var(--spacing-lg);
+  }
+
+  .exito-card h1 {
+    font-size: 1.5rem;
+  }
+
+  .exito-stats {
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+  }
+
+  .exito-stat-value {
+    font-size: 1.5rem;
+  }
 }

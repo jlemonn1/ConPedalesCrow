@@ -6,7 +6,7 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import './Donar.css';
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5173';
+const BASE_URL = window.location.origin;
 
 const amountOptions = [
   { value: 5, label: '5€', desc: 'Un café', icon: '☕' },
