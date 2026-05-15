@@ -6,7 +6,7 @@ export const TRIP_INFO = {
   subtitle: 'Un viaje de5,100 kilómetrosque cambiará nuestras vidas.',
   description: `Somos dos amigos que decidieron dejar todo por un tiempo y vivir la aventura de sus vidas. 
 Desde Toledo, atravesaremos España, Francia, Mónaco, Italia, Eslovenia, Croacia, Bosnia, Montenegro, 
-Albania, Serbia, Kosovo, Macedonia del Norte y llegaremos a Grecia. Sin avión, con excepción de fronteras y averías, solo con la fuerza de nuestras 
+Albania, Serbia, Kosovo, Macedonia del Norte y llegaremos a Grecia. Sin tren ni avión, a excepción de fronteras y averías, solo con la fuerza de nuestras 
 piernas y la ilusión de descubrir el mundo pedaleando.`,
   route: 'Toledo → Barcelona → Niza → Roma → Atenas',
   startDate: new Date('2026-03-15'),
@@ -32,7 +32,7 @@ export const PREVIOUS_TRIPS = [
     title: 'Toledo → Aquasella',
     year: 2025,
     distance: 580,
-    description: 'Ruta por el norte de España hasta las famosas fiestas de Aquasella en Asturias. Playas, montañas y sidra.',
+    description: 'Ruta al norte de España, hasta el mismísimo Aquasella, en el que tantos bailes nos hemos pegado, en Asturias. Playas, montañas, cachopos y sidras.',
     icon: 'asturias',
     image: '/aquasella.jpeg',
   },
