@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLatestStages } from '../../hooks/useStages';
 import { adaptStagesForCards } from '../../services/adapters';
 import StageCard from '../common/StageCard';
@@ -9,11 +9,8 @@ export default function LatestStages() {
   const { stages, loading } = useLatestStages(6);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const trackRef = useRef(null);
 
-  if (loading) return <Loading />;
-
-  const adaptedStages = adaptStagesForCards(stages);
+  const adaptedStages = adaptStagesForCards(stages || []);
   const total = adaptedStages.length;
 
   // Desktop: 3 visibles, Tablet: 2, Mobile: 1
@@ -59,6 +56,7 @@ export default function LatestStages() {
     return () => window.removeEventListener('resize', handleResize);
   }, [total]);
 
+  if (loading) return <Loading />;
   if (total === 0) return null;
 
   const translatePercent = currentIndex * (100 / visibleCount);
@@ -92,7 +90,6 @@ export default function LatestStages() {
 
           <div className="carousel-viewport">
             <div
-              ref={trackRef}
               className="carousel-track"
               style={{ transform: `translateX(-${translatePercent}%)` }}
             >
