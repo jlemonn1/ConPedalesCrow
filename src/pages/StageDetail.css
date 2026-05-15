@@ -70,25 +70,35 @@
 
 @media (max-width: 768px) {
   .stage-stats-grid {
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    overflow-x: auto;
     gap: var(--spacing-sm);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: var(--spacing-sm);
+  }
+
+  .stage-stats-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .stage-stat {
+    flex: 0 0 auto;
+    min-width: 80px;
     padding: var(--spacing-sm);
   }
 
   .stage-stat svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .stat-value {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .stat-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
 }
 
