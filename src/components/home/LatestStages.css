@@ -14,6 +14,33 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.latest-diario-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: 2px;
+}
+
+.latest-diario-link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(255, 107, 53, 0.05);
+}
+
+.latest-diario-link svg {
+  width: 14px;
+  height: 14px;
+}
+
 .latest-header h2 {
   font-size: 2.5rem;
   font-weight: 800;
@@ -140,11 +167,15 @@
   .latest-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 
   .latest-header h2 {
     font-size: 1.75rem;
+  }
+
+  .latest-diario-link {
+    margin-bottom: 0;
   }
 
   .carousel-wrapper {

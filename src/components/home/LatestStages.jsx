@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLatestStages } from '../../hooks/useStages';
 import { adaptStagesForCards } from '../../services/adapters';
 import StageCard from '../common/StageCard';
@@ -6,6 +7,7 @@ import Loading from '../common/Loading';
 import './LatestStages.css';
 
 export default function LatestStages() {
+  const navigate = useNavigate();
   const { stages, loading } = useLatestStages(6);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -73,6 +75,16 @@ export default function LatestStages() {
             <h2>Últimas etapas</h2>
             <p>Síguenos día a día en esta aventura</p>
           </div>
+          <button
+            type="button"
+            className="latest-diario-link"
+            onClick={() => navigate('/diario')}
+          >
+            Diario
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         <div className="carousel-wrapper">
