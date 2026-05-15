@@ -1,0 +1,81 @@
+.floating-donate {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: 999;
+  width: 56px;
+  height: 56px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-donate-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(
+    from 0deg,
+    var(--color-accent),
+    #ff8f66,
+    #ffd1c2,
+    var(--color-accent)
+  );
+  animation: ringSpin 3s linear infinite;
+  mask: radial-gradient(circle, transparent 62%, black 63%);
+  -webkit-mask: radial-gradient(circle, transparent 62%, black 63%);
+}
+
+@keyframes ringSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.floating-donate-inner {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.35);
+  transition: transform var(--transition-fast);
+}
+
+.floating-donate:hover .floating-donate-inner {
+  transform: scale(1.08);
+}
+
+.floating-donate:active .floating-donate-inner {
+  transform: scale(0.96);
+}
+
+@media (max-width: 768px) {
+  .floating-donate {
+    width: 48px;
+    height: 48px;
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+
+  .floating-donate-inner {
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+  }
+
+  .floating-donate-ring {
+    padding: 2px;
+  }
+}

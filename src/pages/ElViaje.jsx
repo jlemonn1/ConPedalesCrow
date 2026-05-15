@@ -1,9 +1,12 @@
+import { useNavigate } from 'react-router-dom';
 import { TRIP_INFO, PREVIOUS_TRIPS } from '../config/constants';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import './ElViaje.css';
 
 export default function ElViaje() {
+  const navigate = useNavigate();
+
   return (
     <>
       <Navbar />
@@ -13,6 +16,12 @@ export default function ElViaje() {
             <h1>El Viaje</h1>
             <p className="tagline">{TRIP_INFO.title}</p>
             <p>{TRIP_INFO.subtitle}</p>
+            <button className="elviaje-cta-btn" onClick={() => navigate('/diario')}>
+              Ver el diario del viaje
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
           </div>
         </div>
         
