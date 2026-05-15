@@ -59,25 +59,24 @@
 /* ===== ARROWS ===== */
 .carousel-arrow {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
-  background: var(--color-bg-alt);
-  color: var(--color-text);
+  border: none;
+  background: transparent;
+  color: var(--color-text-light);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
   z-index: 2;
+  padding: 0;
 }
 
 .carousel-arrow:hover:not(:disabled) {
-  border-color: var(--color-accent);
   color: var(--color-accent);
-  transform: scale(1.1);
-  box-shadow: var(--shadow-sm);
+  transform: scale(1.15);
 }
 
 .carousel-arrow:active:not(:disabled) {
@@ -85,13 +84,13 @@
 }
 
 .carousel-arrow:disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
 .carousel-arrow svg {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
 }
 
 /* ===== DOTS ===== */
@@ -153,13 +152,13 @@
   }
 
   .carousel-arrow {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .carousel-arrow svg {
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
   }
 
   .carousel-slide {
