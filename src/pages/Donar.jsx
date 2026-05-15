@@ -38,9 +38,13 @@ export default function Donar() {
   };
 
   const handleCustomAmountChange = (e) => {
-    setCustomAmount(e.target.value);
-    setSelectedAmount(null);
-    setTouched(prev => ({ ...prev, amount: true }));
+    const val = e.target.value;
+    // Solo permitir números enteros (sin decimales)
+    if (val === '' || /^\d+$/.test(val)) {
+      setCustomAmount(val);
+      setSelectedAmount(null);
+      setTouched(prev => ({ ...prev, amount: true }));
+    }
   };
 
   const handleInputChange = (e) => {
@@ -138,11 +142,14 @@ export default function Donar() {
                   <span className="custom-prefix">€</span>
                   <input
                     type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Otra cantidad"
                     value={customAmount}
                     onChange={handleCustomAmountChange}
                     onBlur={handleBlur}
                     min="1"
+                    step="1"
                   />
                 </div>
 
