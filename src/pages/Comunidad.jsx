@@ -50,7 +50,11 @@ export default function Comunidad() {
             <h2>Todas las donaciones</h2>
             <div className="comunidad-feed">
               {adaptedDonations.map((donation, index) => (
-                <DonationCard key={index} donation={donation} />
+                <DonationCard
+                  key={index}
+                  donation={donation}
+                  align={index % 2 === 0 ? 'left' : 'right'}
+                />
               ))}
             </div>
           </div>

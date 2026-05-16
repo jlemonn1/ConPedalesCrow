@@ -1,16 +1,38 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 
 export function useExitIntent() {
   const [isOpen, setIsOpen] = useState(false);
   const isOpenRef = useRef(false);
   const enabled = useRef(true);
+  const blockerRef = useRef(null);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
+  // React Router blocker — intercepta Links, useNavigate, history.push, etc.
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    if (!enabled.current) return false;
+    // Bloquear si estamos en /donar y queremos ir a otra ruta interna
+    return (
+      currentLocation.pathname === '/donar' &&
+      nextLocation.pathname !== '/donar'
+    );
+  });
+
   useEffect(() => {
-    // Empujar un estado extra para detectar el botón "Atrás"
+    blockerRef.current = blocker;
+  }, [blocker]);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setIsOpen(true);
+    }
+  }, [blocker.state, blocker.location]);
+
+  useEffect(() => {
+    // Empujar un estado extra para detectar el botón "Atrás" del navegador/móvil
     window.history.pushState({ exitIntent: true }, '', window.location.href);
 
     const handlePopState = () => {
@@ -27,7 +49,8 @@ export function useExitIntent() {
       }
     };
 
-    const handleClick = (e) => {
+    // Interceptar clicks en fase de CAPTURA para pillar <a> antes que React Router
+    const handleClickCapture = (e) => {
       if (!enabled.current) return;
 
       const target = e.target.closest('a');
@@ -44,24 +67,28 @@ export function useExitIntent() {
         e.preventDefault();
         if (!isOpenRef.current) {
           setIsOpen(true);
+          // Volvemos a empujar estado para que el back siga funcionando
           window.history.pushState({ exitIntent: true }, '', window.location.href);
         }
       }
     };
 
     window.addEventListener('popstate', handlePopState);
-    document.addEventListener('click', handleClick);
+    document.addEventListener('click', handleClickCapture, true); // fase de captura
 
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      document.removeEventListener('click', handleClick);
+      document.removeEventListener('click', handleClickCapture, true);
     };
   }, []);
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
-    enabled.current = false; // al cerrar con la X se desactiva el exit-intent
+    enabled.current = false; // al cerrar con la X se desactiva permanentemente
+    if (blockerRef.current && blockerRef.current.state === 'blocked') {
+      blockerRef.current.reset();
+    }
   }, []);
 
-  return { isOpen, closeModal };
+  return { isOpen, closeModal, blocker };
 }
