@@ -49,15 +49,16 @@ export default function Diario() {
                     className={`timeline-dot ${stage.current ? 'current' : ''}`}
                     onClick={() => toggleStage(stage.id)}
                   />
-                  <div className="timeline-content">
+                  <div
+                    className="timeline-content"
+                    onClick={() => handleStageClick(stage.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <span className={`timeline-number ${stage.current ? 'current' : ''}`}>
                       ETAPA {stage.number}
                       {stage.current && ' • EN CURSO'}
                     </span>
-                    <h3 
-                      className="timeline-title"
-                      onClick={() => handleStageClick(stage.id)}
-                    >
+                    <h3 className="timeline-title">
                       {stage.title}
                     </h3>
                     <div className="timeline-stats">
@@ -88,10 +89,7 @@ export default function Diario() {
                     )}
                     
                     <div className="timeline-actions">
-                      <button 
-                        className="timeline-view-btn"
-                        onClick={() => handleStageClick(stage.id)}
-                      >
+                      <button className="timeline-view-btn">
                         Ver detalle
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
