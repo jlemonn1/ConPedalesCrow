@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLatestStages } from '../../hooks/useStages';
 import { adaptStagesForCards } from '../../services/adapters';
@@ -11,6 +11,8 @@ export default function LatestStages() {
   const { stages, loading } = useLatestStages(6);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef(null);
 
   const adaptedStages = adaptStagesForCards(stages || []);
   const total = adaptedStages.length;
@@ -38,14 +40,28 @@ export default function LatestStages() {
     setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
   }, [maxIndex]);
 
+  // Intersection Observer: autoplay solo cuando la sección es visible
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Autoplay
   useEffect(() => {
-    if (total <= visibleCount || isPaused) return;
+    if (total <= visibleCount || isPaused || !isInView) return;
     const interval = setInterval(() => {
       goNext();
     }, 4000);
     return () => clearInterval(interval);
-  }, [total, visibleCount, isPaused, goNext]);
+  }, [total, visibleCount, isPaused, isInView, goNext]);
 
   // Responsive re-calc
   useEffect(() => {
@@ -65,6 +81,7 @@ export default function LatestStages() {
 
   return (
     <section
+      ref={sectionRef}
       className="latest-stages"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
