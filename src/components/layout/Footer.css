@@ -57,10 +57,40 @@
 
 .footer-bike {
   position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 34px;
+  left: -60px;
   font-size: 3rem;
+  animation: bikeRide 10s linear infinite;
+  will-change: transform, left;
+}
+
+@keyframes bikeRide {
+  0% {
+    left: -60px;
+    transform: translateY(0) rotate(-2deg) scaleX(-1);
+  }
+  15% {
+    transform: translateY(-3px) rotate(1deg) scaleX(-1);
+  }
+  30% {
+    transform: translateY(0) rotate(-1deg) scaleX(-1);
+  }
+  45% {
+    transform: translateY(-4px) rotate(2deg) scaleX(-1);
+  }
+  60% {
+    transform: translateY(0) rotate(-1deg) scaleX(-1);
+  }
+  75% {
+    transform: translateY(-2px) rotate(1deg) scaleX(-1);
+  }
+  90% {
+    transform: translateY(0) rotate(-1deg) scaleX(-1);
+  }
+  100% {
+    left: calc(100% + 40px);
+    transform: translateY(0) rotate(0deg) scaleX(-1);
+  }
 }
 
 .footer-container {
