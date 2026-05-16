@@ -25,10 +25,10 @@ export default function Donar() {
 
   const { totalDonors, loading: statsLoading } = useKmProgress();
 
-  const finalAmount = selectedAmount || (customAmount ? parseInt(customAmount) : 0);
+  const finalAmount = selectedAmount || (customAmount ? parseFloat(customAmount) : 0);
   const kmFinanced = Math.floor(finalAmount / DONATION_CONFIG.pricePerKm);
 
-  const amountError = touched.amount && finalAmount < 1;
+  const amountError = touched.amount && finalAmount < 0.5;
   const nameError = touched.name && !formData.name.trim();
   const emailRequired = finalAmount >= 10;
   const emailError = touched.email && emailRequired && !formData.email.trim();
@@ -41,8 +41,8 @@ export default function Donar() {
 
   const handleCustomAmountChange = (e) => {
     const val = e.target.value;
-    // Solo permitir números enteros (sin decimales)
-    if (val === '' || /^\d+$/.test(val)) {
+    // Permitir números con hasta 2 decimales
+    if (val === '' || /^\d*\.?\d{0,2}$/.test(val)) {
       setCustomAmount(val);
       setSelectedAmount(null);
       setTouched(prev => ({ ...prev, amount: true }));
@@ -62,7 +62,7 @@ export default function Donar() {
     e.preventDefault();
     setTouched({ amount: true, name: true, email: true });
 
-    if (!finalAmount || finalAmount < 1) return;
+    if (!finalAmount || finalAmount < 0.5) return;
     if (!formData.name.trim()) return;
     if (emailRequired && !formData.email.trim()) return;
 
@@ -151,8 +151,8 @@ export default function Donar() {
                     value={customAmount}
                     onChange={handleCustomAmountChange}
                     onBlur={handleBlur}
-                    min="1"
-                    step="1"
+                    min="0.5"
+                    step="0.01"
                   />
                 </div>
 

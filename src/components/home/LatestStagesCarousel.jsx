@@ -36,49 +36,24 @@ export default function LatestStagesCarousel({ stages }) {
   // Intersection Observer: autoplay solo cuando la sección es visible
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) {
-      console.log('[LatestStagesCarousel] IntersectionObserver: no hay ref');
-      return;
-    }
-    console.log('[LatestStagesCarousel] IntersectionObserver inicializado sobre', el);
+    if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('[LatestStagesCarousel] IntersectionObserver callback:', {
-          isIntersecting: entry.isIntersecting,
-          intersectionRatio: entry.intersectionRatio,
-          boundingRect: entry.boundingClientRect,
-        });
         setIsInView(entry.isIntersecting);
       },
       { threshold: 0, rootMargin: '0px 0px -10% 0px' }
     );
     observer.observe(el);
-    return () => {
-      console.log('[LatestStagesCarousel] IntersectionObserver desconectado');
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
   // Autoplay
   useEffect(() => {
-    console.log('[LatestStagesCarousel] Autoplay effect:', { total, visibleCount, isPaused, isInView });
-    if (total <= visibleCount || isPaused || !isInView) {
-      console.log('[LatestStagesCarousel] Autoplay NO arranca. Razón:',
-        total <= visibleCount ? 'total <= visibleCount' :
-        isPaused ? 'isPaused' :
-        !isInView ? '!isInView' : 'desconocido'
-      );
-      return;
-    }
-    console.log('[LatestStagesCarousel] Autoplay ARRANCA intervalo 4000ms');
+    if (total <= visibleCount || isPaused || !isInView) return;
     const interval = setInterval(() => {
-      console.log('[LatestStagesCarousel] Autoplay tick -> goNext');
       goNext();
     }, 4000);
-    return () => {
-      console.log('[LatestStagesCarousel] Autoplay PARA (cleanup)');
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [total, visibleCount, isPaused, isInView, goNext]);
 
   // Responsive re-calc
@@ -94,44 +69,13 @@ export default function LatestStagesCarousel({ stages }) {
 
   const translatePercent = currentIndex * (100 / visibleCount);
 
-  console.log('[LatestStagesCarousel] Render:', { isInView, isPaused, currentIndex, total, visibleCount });
-
   return (
     <section
       ref={sectionRef}
       className="latest-stages"
-      onMouseEnter={() => {
-        console.log('[LatestStagesCarousel] onMouseEnter -> isPaused = true');
-        setIsPaused(true);
-      }}
-      onMouseLeave={() => {
-        console.log('[LatestStagesCarousel] onMouseLeave -> isPaused = false');
-        setIsPaused(false);
-      }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Debug overlay: quitar en producción */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 8,
-          right: 8,
-          zIndex: 9999,
-          background: 'rgba(0,0,0,0.85)',
-          color: '#fff',
-          padding: '6px 10px',
-          borderRadius: 6,
-          fontSize: 11,
-          fontFamily: 'monospace',
-          pointerEvents: 'none',
-          lineHeight: 1.4,
-        }}
-      >
-        <div>inView: {isInView ? '✅' : '❌'}</div>
-        <div>paused: {isPaused ? '⏸' : '▶️'}</div>
-        <div>idx: {currentIndex}</div>
-        <div>tot/vis: {total}/{visibleCount}</div>
-      </div>
-
       <div className="container">
         <div className="latest-header">
           <div>
