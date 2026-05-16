@@ -23,18 +23,20 @@
   font-size: 1.125rem;
 }
 
-.donation-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.donation-conversation {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 @media (max-width: 768px) {
-  .donation-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .donation-header h2 {
     font-size: 1.75rem;
+  }
+
+  .donation-conversation {
+    gap: var(--spacing-sm);
   }
 }

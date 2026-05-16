@@ -18,10 +18,14 @@ export default function DonationFeed() {
           <h2>Comunidad</h2>
           <p>Gente que ya nos acompaña en esta aventura</p>
         </div>
-        
-        <div className="donation-grid">
+
+        <div className="donation-conversation">
           {adaptedDonations.map((donation, index) => (
-            <DonationCard key={index} donation={donation} />
+            <DonationCard
+              key={index}
+              donation={donation}
+              align={index % 2 === 0 ? 'left' : 'right'}
+            />
           ))}
         </div>
       </div>
