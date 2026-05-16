@@ -1,0 +1,183 @@
+/* ============================================
+   EXIT INTENT MODAL — Pantalla completa
+   ============================================ */
+
+.exit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: exitModalFadeIn 0.25s ease-out;
+}
+
+@keyframes exitModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.exit-modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  padding: 2.5rem 1.75rem 2rem;
+  text-align: center;
+  animation: exitModalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes exitModalSlideUp {
+  from {
+    transform: translateY(40px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Botón cerrar (cruz) */
+.exit-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.exit-modal-close:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Icono */
+.exit-modal-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+/* Texto principal */
+.exit-modal-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.5;
+  margin: 0 0 1.75rem;
+}
+
+/* Botón CTA */
+.exit-modal-cta {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 14px;
+  background: #10b981;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.exit-modal-cta:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.exit-modal-cta:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.exit-modal-cta:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.exit-modal-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: exitModalSpin 0.7s linear infinite;
+}
+
+@keyframes exitModalSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Subtexto */
+.exit-modal-sub {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ============================================
+   Responsive — móvil casi fullscreen
+   ============================================ */
+
+@media (max-width: 480px) {
+  .exit-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .exit-modal-panel {
+    max-width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 2rem 1.5rem 2.5rem;
+    animation: exitModalSlideUpMobile 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes exitModalSlideUpMobile {
+    from {
+      transform: translateY(100%);
+      opacity: 0.8;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .exit-modal-text {
+    font-size: 1.15rem;
+  }
+
+  .exit-modal-cta {
+    font-size: 1.1rem;
+  }
+}

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { publicApi } from '../services/api';
 import { DONATION_CONFIG } from '../config/constants';
 import { useKmProgress } from '../hooks/useStats';
+import { useExitIntent } from '../hooks/useExitIntent';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import ExitIntentModal from '../components/donation/ExitIntentModal';
 import './Donar.css';
 
 const BASE_URL = window.location.origin;
@@ -24,6 +26,7 @@ export default function Donar() {
   const [touched, setTouched] = useState({ amount: false, name: false, email: false });
 
   const { totalDonors, loading: statsLoading } = useKmProgress();
+  const { isOpen: showExitModal, closeModal: closeExitModal } = useExitIntent();
 
   const finalAmount = selectedAmount || (customAmount ? parseFloat(customAmount) : 0);
   const kmFinanced = Math.floor(finalAmount / DONATION_CONFIG.pricePerKm);
@@ -86,6 +89,26 @@ export default function Donar() {
       console.error('Error creating checkout:', err);
       setError('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
     } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleQuickDonate = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await publicApi.createCheckout({
+        amount: 0.5,
+        name: 'Amigo/a',
+        successUrl: `${BASE_URL}/donar/exito`,
+        cancelUrl: `${BASE_URL}/donar/cancelar`,
+      });
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl;
+      }
+    } catch (err) {
+      console.error('Error creating quick checkout:', err);
+      setError('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
       setSubmitting(false);
     }
   };
@@ -274,6 +297,13 @@ export default function Donar() {
         </div>
       </div>
       <Footer />
+
+      <ExitIntentModal
+        isOpen={showExitModal}
+        onClose={closeExitModal}
+        onDonate={handleQuickDonate}
+        submitting={submitting}
+      />
     </>
   );
 }
