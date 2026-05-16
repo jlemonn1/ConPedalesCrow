@@ -25,16 +25,14 @@
 }
 
 .navbar-logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--color-text);
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
 }
 
-.navbar-logo span {
-  color: var(--color-accent);
+.navbar-logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
 .navbar-links {

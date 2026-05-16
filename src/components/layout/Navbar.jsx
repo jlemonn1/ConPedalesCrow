@@ -32,7 +32,7 @@ export default function Navbar() {
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          Con<span>Pedales</span>
+          <img src="/logoPedales.png" alt="ConPedales" className="navbar-logo-img" />
         </Link>
         
         <div className={`navbar-links ${mobileOpen ? 'open' : ''}`}>

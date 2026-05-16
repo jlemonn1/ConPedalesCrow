@@ -15,14 +15,32 @@ export default function LatestStagesCarousel({ stages }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [isUserInteracted, setIsUserInteracted] = useState(false);
   const sectionRef = useRef(null);
+  const viewportRef = useRef(null);
+  const isProgrammaticScroll = useRef(false);
 
   const total = stages.length;
   const visibleCount = getVisibleCount();
   const maxIndex = Math.max(0, total - visibleCount);
 
+  const scrollToIndex = useCallback((index) => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const slideWidth = el.clientWidth / visibleCount;
+    const target = index * slideWidth;
+    if (Math.abs(el.scrollLeft - target) > 2) {
+      isProgrammaticScroll.current = true;
+      el.scrollTo({ left: target, behavior: 'smooth' });
+      window.setTimeout(() => {
+        isProgrammaticScroll.current = false;
+      }, 500);
+    }
+  }, [visibleCount]);
+
   const goTo = useCallback((index) => {
-    setCurrentIndex(Math.max(0, Math.min(index, maxIndex)));
+    const clamped = Math.max(0, Math.min(index, maxIndex));
+    setCurrentIndex(clamped);
   }, [maxIndex]);
 
   const goNext = useCallback(() => {
@@ -32,6 +50,31 @@ export default function LatestStagesCarousel({ stages }) {
   const goPrev = useCallback(() => {
     setCurrentIndex(prev => (prev <= 0 ? maxIndex : prev - 1));
   }, [maxIndex]);
+
+  // Sincroniza el scroll del viewport con currentIndex
+  useEffect(() => {
+    scrollToIndex(currentIndex);
+  }, [currentIndex, visibleCount, scrollToIndex]);
+
+  // Detecta scroll manual y actualiza índice
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      if (isProgrammaticScroll.current) return;
+      const slideWidth = el.clientWidth / visibleCount;
+      const newIndex = Math.round(el.scrollLeft / slideWidth);
+      const clamped = Math.max(0, Math.min(newIndex, maxIndex));
+      if (clamped !== currentIndex) {
+        setCurrentIndex(clamped);
+        setIsUserInteracted(true);
+      }
+    };
+
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [currentIndex, maxIndex, visibleCount]);
 
   // Intersection Observer: autoplay solo cuando la sección es visible
   useEffect(() => {
@@ -49,12 +92,12 @@ export default function LatestStagesCarousel({ stages }) {
 
   // Autoplay
   useEffect(() => {
-    if (total <= visibleCount || isPaused || !isInView) return;
+    if (total <= visibleCount || isPaused || !isInView || isUserInteracted) return;
     const interval = setInterval(() => {
       goNext();
     }, 4000);
     return () => clearInterval(interval);
-  }, [total, visibleCount, isPaused, isInView, goNext]);
+  }, [total, visibleCount, isPaused, isInView, isUserInteracted, goNext]);
 
   // Responsive re-calc
   useEffect(() => {
@@ -66,8 +109,6 @@ export default function LatestStagesCarousel({ stages }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [total]);
-
-  const translatePercent = currentIndex * (100 / visibleCount);
 
   return (
     <section
@@ -107,11 +148,8 @@ export default function LatestStagesCarousel({ stages }) {
             </svg>
           </button>
 
-          <div className="carousel-viewport">
-            <div
-              className="carousel-track"
-              style={{ transform: `translateX(-${translatePercent}%)` }}
-            >
+          <div className="carousel-viewport" ref={viewportRef}>
+            <div className="carousel-track">
               {stages.map(stage => (
                 <div
                   key={stage.id}
