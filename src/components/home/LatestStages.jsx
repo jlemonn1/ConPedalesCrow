@@ -43,24 +43,49 @@ export default function LatestStages() {
   // Intersection Observer: autoplay solo cuando la sección es visible
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return;
+    if (!el) {
+      console.log('[LatestStages] IntersectionObserver: no hay ref');
+      return;
+    }
+    console.log('[LatestStages] IntersectionObserver inicializado sobre', el);
     const observer = new IntersectionObserver(
       ([entry]) => {
+        console.log('[LatestStages] IntersectionObserver callback:', {
+          isIntersecting: entry.isIntersecting,
+          intersectionRatio: entry.intersectionRatio,
+          boundingRect: entry.boundingClientRect,
+        });
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.3 }
+      { threshold: 0, rootMargin: '0px 0px -10% 0px' }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      console.log('[LatestStages] IntersectionObserver desconectado');
+      observer.disconnect();
+    };
   }, []);
 
   // Autoplay
   useEffect(() => {
-    if (total <= visibleCount || isPaused || !isInView) return;
+    console.log('[LatestStages] Autoplay effect:', { total, visibleCount, isPaused, isInView });
+    if (total <= visibleCount || isPaused || !isInView) {
+      console.log('[LatestStages] Autoplay NO arranca. Razón:',
+        total <= visibleCount ? 'total <= visibleCount' :
+        isPaused ? 'isPaused' :
+        !isInView ? '!isInView' : 'desconocido'
+      );
+      return;
+    }
+    console.log('[LatestStages] Autoplay ARRANCA intervalo 4000ms');
     const interval = setInterval(() => {
+      console.log('[LatestStages] Autoplay tick -> goNext');
       goNext();
     }, 4000);
-    return () => clearInterval(interval);
+    return () => {
+      console.log('[LatestStages] Autoplay PARA (cleanup)');
+      clearInterval(interval);
+    };
   }, [total, visibleCount, isPaused, isInView, goNext]);
 
   // Responsive re-calc
@@ -79,13 +104,44 @@ export default function LatestStages() {
 
   const translatePercent = currentIndex * (100 / visibleCount);
 
+  console.log('[LatestStages] Render:', { isInView, isPaused, currentIndex, total, visibleCount });
+
   return (
     <section
       ref={sectionRef}
       className="latest-stages"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => {
+        console.log('[LatestStages] onMouseEnter -> isPaused = true');
+        setIsPaused(true);
+      }}
+      onMouseLeave={() => {
+        console.log('[LatestStages] onMouseLeave -> isPaused = false');
+        setIsPaused(false);
+      }}
     >
+      {/* Debug overlay: quitar en producción */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 8,
+          right: 8,
+          zIndex: 9999,
+          background: 'rgba(0,0,0,0.85)',
+          color: '#fff',
+          padding: '6px 10px',
+          borderRadius: 6,
+          fontSize: 11,
+          fontFamily: 'monospace',
+          pointerEvents: 'none',
+          lineHeight: 1.4,
+        }}
+      >
+        <div>inView: {isInView ? '✅' : '❌'}</div>
+        <div>paused: {isPaused ? '⏸' : '▶️'}</div>
+        <div>idx: {currentIndex}</div>
+        <div>tot/vis: {total}/{visibleCount}</div>
+      </div>
+
       <div className="container">
         <div className="latest-header">
           <div>

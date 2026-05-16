@@ -31,28 +31,30 @@
 }
 
 .comunidad-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xxl);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
 }
 
 .comunidad-stat {
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: center;
-  box-shadow: var(--shadow-sm);
 }
 
 .comunidad-stat-value {
-  font-size: 3rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--color-accent);
 }
 
 .comunidad-stat-label {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--color-text-light);
 }
 
@@ -93,10 +95,14 @@
   }
   
   .comunidad-stats {
-    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
-  
+
   .comunidad-stat-value {
-    font-size: 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  .comunidad-stat-label {
+    font-size: 0.8rem;
   }
 }
